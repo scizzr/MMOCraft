@@ -1,0 +1,18 @@
+name: MMOCraft
+version: 1.2.5-R4_b1
+main: com.scizzr.bukkit.plugins.mmocraft.Main
+authors:
+  - Scizzr
+softdepend: [Vault]
+commands:
+  class:
+    description: Set class or get class information
+    usage:
+      /<command> [class]        : Get information about a class
+      /<command> set [class]    : Set class
+  mmo:
+    description: MMO commands
+    usage:
+      /<command> stats [player] : View player information
+permissions:
+  

@@ -1,0 +1,81 @@
+1.2.5-R4_b1
+  CB 1.2.5 R4
+  Initial release
+
+Ideas
+  Fatigue - Damage weakens as you attack more people; regens over time.
+  
+  
+  
+  Mobs as pets
+    • Right-click a mob with an iron bar once to train it.
+      o Chance of this working is based on the mob's health and the player's Taming level.
+  Classes, skills, and pet system
+    • Select a class with '/class <class>'
+    • Classes
+      o Archer
+        » Pet magma cube
+        » Bow
+          • Left-click to scroll through skills
+          • Right-click (shoot) to use skill
+      o Assassin
+        » Pet creeper
+        » Sword
+          • Right-click to scroll through skills
+          • Left-click (attack) to use skill
+      o Barbarian
+        » Pet silverfish
+        » Axe
+          • Right-click to scroll through skills
+          • Left-click (attack) to use skill
+      o Druid
+        » Pet cave spider
+        » Book
+          • Right-click to scroll through skills
+          • Left-click (punch) to use skill
+      o Mage
+        » Pet zombie pigman
+        » Stick
+          • Right-click to scroll through skills
+          • Left-click (punch) to use skill
+      o Necromancer
+        » Pet skeleton
+        » Bone
+          • Right-click to scroll through skills
+          • Left-click (punch) to use skill
+    • Skills
+      o Archer
+        » L  0 > Normal arrow
+        » L 10 > Poison arrow
+        » L 20 > Flaming arrow
+        » L 30 > Exploding arrow
+      o Assassain
+        » L  0 > Stealth (sneak to go invis, >3 blocks)
+        » L 10 > Sneak attack (+50% DMG when behind)
+        » L 20 > 
+        » L 30 > Stab attack (+100% DMG if invis and behind)
+      o Barbarian
+        » L  0 > Normal attack
+        » L 10 > Knockback attack
+        » L 20 > 
+        » L 30 > Whirlwind AoE
+      o Druid
+        » L  0 > Heal
+        » L 10 > Improved heal
+        » L 20 > Urgent heal
+        » L 30 > Group heal
+      o Mage
+        » L  0 > Fire bolt
+        » L 10 > Lightning
+        » L 20 > Teleport
+        » L 30 > Fire ball
+      o Necromancer
+        » L  0 > Normal skeleton
+        » L 10 > Flaming skeleton
+        » L 20 > Poison skeleton
+        » L 30 > Blinding skeleton
+    • Pets
+      o Delayed respawn if killed by something
+      o Will follow and fight with master
+      o Only attack when master attacks or is attacked
+      o 
