@@ -19,7 +19,8 @@ import com.scizzr.bukkit.plugins.mmocraft.config.Config;
 import com.scizzr.bukkit.plugins.mmocraft.config.PlayerData;
 import com.scizzr.bukkit.plugins.mmocraft.managers.CheatManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
-import com.scizzr.bukkit.plugins.mmocraft.threads.Website;
+import com.scizzr.bukkit.plugins.mmocraft.threads.Update;
+import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
 
 public class Players implements Listener {
     Main plugin;
@@ -74,8 +75,8 @@ public class Players implements Listener {
     public void onPlayerJoin(final PlayerJoinEvent e) {
         Player p = e.getPlayer();
         
-        if (Config.genVerCheck == true) {
-            new Thread(new Website("checkVersion", p)).start();
+        if (Config.genVerCheck == true && Vault.hasPermission(p, "newver")) {
+            new Thread(new Update("check", p, null)).start();
         }
     }
 }

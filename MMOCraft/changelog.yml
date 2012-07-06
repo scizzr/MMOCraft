@@ -2,11 +2,11 @@
   CB 1.2.5 R4
   Initial release
 
+Todo
+  Detection of solid blocks when placing traps (don't replace whatever is above where the player right-clicks)
+  
+
 Ideas
-  Fatigue - Damage weakens as you attack more people; regens over time.
-  
-  
-  
   Mobs as pets
     • Right-click a mob with an iron bar once to train it.
       o Chance of this working is based on the mob's health and the player's Taming level.

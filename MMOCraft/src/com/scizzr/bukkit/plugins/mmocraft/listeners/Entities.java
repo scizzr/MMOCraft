@@ -65,13 +65,10 @@ public class Entities implements Listener {
         if (pAtt != null) {
             EntityManager.setAttacker(eDef, pAtt);
             double diff = MoreMath.setDec(pAtt.getLocation().distance(eDef.getLocation()), 2);
-            int extraXP = 0;
             
             if (diff >= 50) {
-                extraXP = (int)(diff);
+                ClassManager.addExp(pAtt, (int)diff, "Nice shot! +%s XP (" + diff + " blocks)");
             }
-            
-            if (extraXP > 0) { ClassManager.addExp(pAtt, extraXP, "Nice shot! +%s XP (" + diff + " blocks)"); }
         }
         
         /*

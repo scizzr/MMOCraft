@@ -13,10 +13,10 @@ public class PlayerData {
         if(!Main.filePlayerData.exists()) {
             try {
                 Main.filePlayerData.createNewFile();
-                Main.log.info(Main.prefixConsole + "Blank playerOpt.yml created");
+                Main.log.info(Main.prefixConsole + "Blank playerData.yml created");
                 return true;
             } catch (Exception ex) {
-                Main.log.info(Main.prefixConsole + "Failed to make playerOpt.yml");
+                Main.log.info(Main.prefixConsole + "Failed to make playerData.yml");
                 Main.suicide(ex);
                 return false;
             }
@@ -39,10 +39,9 @@ public class PlayerData {
     public static Object getOpt(Player p, String o) {
         try {
             config.load(Main.filePlayerData);
-        } catch (Exception ex) { Main.log.info(Main.prefixConsole + "Failed to load playerOpt.yml"); Main.suicide(ex); }
+        } catch (Exception ex) { Main.log.info(Main.prefixConsole + "Failed to load playerData.yml"); Main.suicide(ex); }
         
-        String val = config.getString(p.getName() +
-            "." + o);
+        String val = config.getString(p.getName() + "." + o);
         
         return val != null ? val : null;
     }
@@ -78,7 +77,7 @@ public class PlayerData {
     static void checkOption(YamlConfiguration config, Player p, String opt, Object def) {
         if (!config.isSet(p.getName() + "." + opt)) {
             config.set(p.getName() + "." + opt, def);
-            try { config.save(Main.filePlayerData); } catch (Exception ex) { Main.log.info(Main.prefixConsole + "Failed to save playerOpt.yml"); Main.suicide(ex); }
+            try { config.save(Main.filePlayerData); } catch (Exception ex) { Main.log.info(Main.prefixConsole + "Failed to save playerData.yml"); Main.suicide(ex); }
         }
     }
     
@@ -88,7 +87,7 @@ public class PlayerData {
                 config.set(p.getName() + "." + nodeNew, config.get(p.getName() + "." + nodeOld));
             }
             config.set(nodeOld, null);
-            try { config.save(Main.filePlayerData); } catch (Exception ex) { p.sendMessage(Main.prefix + "Failed to save playerOpt.yml"); Main.suicide(ex); }
+            try { config.save(Main.filePlayerData); } catch (Exception ex) { p.sendMessage(Main.prefix + "Failed to save playerData.yml"); Main.suicide(ex); }
         }
     }
 }

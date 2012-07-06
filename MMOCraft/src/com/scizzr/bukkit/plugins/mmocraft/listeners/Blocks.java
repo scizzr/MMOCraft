@@ -18,7 +18,7 @@ public class Blocks implements Listener {
         plugin = instance;
     }
     
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
     public void onBlockBreak(final BlockBreakEvent e) {
         Player p = e.getPlayer();
         Block b = e.getBlock();

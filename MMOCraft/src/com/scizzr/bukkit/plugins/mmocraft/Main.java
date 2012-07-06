@@ -28,10 +28,11 @@ import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Errors;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Meteor;
-import com.scizzr.bukkit.plugins.mmocraft.threads.Website;
 import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
 import com.scizzr.bukkit.plugins.mmocraft.util.MoreString;
 import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
+import com.scizzr.bukkit.plugins.mmocraft.threads.Stats;
+import com.scizzr.bukkit.plugins.mmocraft.threads.Update;
 
 public class Main extends JavaPlugin {
     public static Logger log = Logger.getLogger("Minecraft");
@@ -52,14 +53,14 @@ public class Main extends JavaPlugin {
     
     public static String osN = System.getProperty("os.name").toLowerCase();
     public static String os = (osN.contains("windows") ? "Windows" :
-                                (osN.contains("linux")) ? "Linux" :
-                                    (osN.contains("mac")) ? "Macintosh":
-                                        osN);
+        (osN.contains("linux")) ? "Linux" :
+            (osN.contains("mac")) ? "Macintosh" :
+                osN);
     
     public static String slash = os.equalsIgnoreCase("Windows") ? "\\" : "/";
     
-    static String[] f = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("\\", "/").split("/");
-    public static String jar = f[f.length - 1];
+    public static File filePlug = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("\\", "/"));
+    public static String jar = filePlug.getAbsolutePath().split("/")[filePlug.getAbsolutePath().split("/").length - 1];
     
     public static int calY, calM, calD, calH, calI, calS;
     public static String calA;
@@ -110,7 +111,11 @@ public class Main extends JavaPlugin {
         Vault.setupEconomy();
         log.info(prefixConsole + "Economy has been setup.");
         
-        new Thread(new Website("postStats", null)).start();
+        new Thread(new Stats()).start();
+        
+        if (Config.genVerCheck == true) {
+            new Thread(new Update("check", null, null)).start();
+        }
         
         if (!isScheduled) {
             isScheduled = true;
@@ -144,6 +149,10 @@ public class Main extends JavaPlugin {
                                 if (calS % 2 == 0) {
                                     Archer.fireTurrets();
                                 }
+                            }
+                            
+                            if (lastTick % 10 == 0) {
+                                
                             }
                             
                             if (lastTick % 10 == 0) {

@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
 import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
 
@@ -137,19 +138,19 @@ public class Archer {
         if (SkillManager.isCooldown(p, "archer_turret")) { return; } else { SkillManager.addCooldown(p, "archer_turret", 60); }
         
         bTarg.setType(Material.FENCE);
-        turrets.put(bTarg.getX() + "," + bTarg.getY() + "," + bTarg.getZ(), p);
+        turrets.put(bTarg.getWorld().getName() + "," + bTarg.getX() + "," + bTarg.getY() + "," + bTarg.getZ(), p);
         Location loc = bTarg.getLocation();
-        p.sendMessage(Main.prefix + "Turret added at " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ());
+        p.sendMessage(Main.prefix + "Turret added at [" + loc.getWorld().getName() + "] " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ());
     }
     
     public static void removeTurret(Block b, Player p) {
         if (isTurret(b)) {
-            Player own = turrets.get(b.getX() + "," + b.getY() + "," + b.getZ());
+            Player own = turrets.get(b.getWorld().getName() +  "," + b.getX() + "," + b.getY() + "," + b.getZ());
             if (own.isOnline()) {
                 Location loc = b.getLocation();
-                own.sendMessage(Main.prefix + "Turret at " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ() + " broken by " + p.getName());
+                own.sendMessage(Main.prefix + "Turret at [" + loc.getWorld().getName() + "] " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ() + " broken by " + p.getName());
             }
-            turrets.remove(b.getX() + "," + b.getY() + "," + b.getZ());
+            turrets.remove(b.getWorld().getName() + "," + b.getX() + "," + b.getY() + "," + b.getZ());
             b.setType(Material.AIR);
         }
     }
@@ -158,10 +159,10 @@ public class Archer {
         Block b;
         for (String s : turrets.keySet()) {
             String[] pos = s.split(",");
-            String w = "world";
-            int x = Integer.valueOf(pos[0]);
-            int y = Integer.valueOf(pos[1]);
-            int z = Integer.valueOf(pos[2]);
+            String w = pos[0];
+            int x = Integer.valueOf(pos[1]);
+            int y = Integer.valueOf(pos[2]);
+            int z = Integer.valueOf(pos[3]);
             
             b = Bukkit.getWorld(w).getBlockAt(new Location(Bukkit.getWorld(w), x, y, z));
             if (Main.calS % 2 == 0) {
@@ -196,10 +197,10 @@ public class Archer {
             }
 */
             String[] pos = s.split(",");
-            String w = "world";
-            int x = Integer.valueOf(pos[0]);
-            int y = Integer.valueOf(pos[1]);
-            int z = Integer.valueOf(pos[2]);
+            String w = pos[0];
+            int x = Integer.valueOf(pos[1]);
+            int y = Integer.valueOf(pos[2]);
+            int z = Integer.valueOf(pos[3]);
             
             Location locT = new Location(Bukkit.getWorld(w), x+0.5, y+1.5, z+0.5);
             
@@ -237,7 +238,9 @@ public class Archer {
                     final Vector direction = loc.getDirection().multiply(2);
                     
                     Arrow arrow = Bukkit.getWorld(w).spawn(locTur, Arrow.class);
-                    arrow.setVelocity(direction); //arrow.setShooter(turrets.get(s)); arrow.setFireTicks(60);
+                    arrow.setVelocity(direction); //arrow.setShooter(turrets.get(s)); //arrow.setFireTicks(60);
+                    
+                    EntityManager.setAttacker(ent, turrets.get(s));
                     
                     ArrowTimer.add(arrow, 3);
                 }
@@ -260,7 +263,7 @@ public class Archer {
     }
     
     public static boolean isTurret(Block b) {
-        return turrets.containsKey(b.getX() + "," + b.getY() + "," + b.getZ());
+        return turrets.containsKey(b.getWorld().getName() + "," + b.getX() + "," + b.getY() + "," + b.getZ());
     }
     
     public static void loadTurrets() {

@@ -87,8 +87,6 @@ public class Wizard {
         
         double t = Math.atan(a/b);                                              // Tangent from block to meteor
         
-        Bukkit.broadcastMessage("angle = " + t);
-        
         double A = t * (180/Math.PI);                                           // Block's angle to meteor
         //double B = 180 - A - 90.0;                                            // Angle to fire meteor
         //double C = 90.0;                                                      // Square angle
@@ -120,23 +118,23 @@ public class Wizard {
         if (SkillManager.isCooldown(p, "wizard_trap")) { return; } else { SkillManager.addCooldown(p, "wizard_trap", 60); }
         
         bTarg.setType(Material.STONE_PLATE);
-        traps.put(bTarg.getX() + "," + bTarg.getY() + "," + bTarg.getZ(), p);
+        traps.put(bTarg.getWorld().getName() + "," + bTarg.getX() + "," + bTarg.getY() + "," + bTarg.getZ(), p);
         Location loc = bTarg.getLocation();
-        p.sendMessage(Main.prefix + "Trap added at " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ());
+        p.sendMessage(Main.prefix + "Trap added at [" + loc.getWorld().getName() + "] " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ());
     }
     
     public static void stepTrap(Entity ent, Block b) {
         if (isTrap(b)) {
-            Player own = traps.get(b.getX() + "," + b.getY() + "," + b.getZ());
+            Player own = traps.get(b.getWorld().getName() + "," + b.getX() + "," + b.getY() + "," + b.getZ());
             if (own != ent) {
                 EntityManager.setAttacker(ent, own);
                 b.setType(Material.AIR);
-                traps.remove(b.getX() + "," + b.getY() + "," + b.getZ());
+                traps.remove(b.getWorld().getName() + "," + b.getX() + "," + b.getY() + "," + b.getZ());
                 ent.setFireTicks(ent.getFireTicks()+60);
                 if (own.isOnline()) {
                     Location loc = b.getLocation();
                     String name = ent instanceof Player ? ((Player)ent).getName() : ent.getType().getName();
-                    own.sendMessage(Main.prefix + "Trap at " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ() + " sprung by " + name);
+                    own.sendMessage(Main.prefix + "Trap at [" + loc.getWorld().getName() + "] " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ() + " sprung by " + name);
                 }
             }
         }
@@ -144,12 +142,12 @@ public class Wizard {
     
     public static void removeTrap(Block b, Player p) {
         if (isTrap(b)) {
-            Player own = traps.get(b.getX() + "," + b.getY() + "," + b.getZ());
+            Player own = traps.get(b.getWorld().getName() + "," + b.getX() + "," + b.getY() + "," + b.getZ());
             if (own.isOnline()) {
                 Location loc = b.getLocation();
-                own.sendMessage(Main.prefix + "Trap at " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ() + " broken by " + p.getName());
+                own.sendMessage(Main.prefix + "Trap at [" + loc.getWorld().getName() + "] " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ() + " broken by " + p.getName());
             }
-            traps.remove(b.getX() + "," + b.getY() + "," + b.getZ());
+            traps.remove(b.getWorld().getName() + "," + b.getX() + "," + b.getY() + "," + b.getZ());
             b.setType(Material.AIR);
         }
     }
@@ -158,10 +156,10 @@ public class Wizard {
         Block b;
         for (String s : traps.keySet()) {
             String[] pos = s.split(",");
-            String w = "world";
-            int x = Integer.valueOf(pos[0]);
-            int y = Integer.valueOf(pos[1]);
-            int z = Integer.valueOf(pos[2]);
+            String w = pos[0];
+            int x = Integer.valueOf(pos[1]);
+            int y = Integer.valueOf(pos[2]);
+            int z = Integer.valueOf(pos[3]);
             
             b = Bukkit.getWorld(w).getBlockAt(new Location(Bukkit.getWorld(w), x, y, z));
             if (Main.calS % 2 == 0) {
@@ -187,6 +185,6 @@ public class Wizard {
     }
     
     public static boolean isTrap(Block b) {
-        return traps.containsKey(b.getX() + "," + b.getY() + "," + b.getZ());
+        return traps.containsKey(b.getWorld().getName() + "," + b.getX() + "," + b.getY() + "," + b.getZ());
     }
 }
