@@ -15,11 +15,10 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.scizzr.bukkit.plugins.mmocraft.classes.Archer;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Wizard;
 import com.scizzr.bukkit.plugins.mmocraft.config.Config;
 import com.scizzr.bukkit.plugins.mmocraft.config.ConfigMain;
 import com.scizzr.bukkit.plugins.mmocraft.config.PlayerData;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Blocks;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Entities;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Players;
@@ -28,11 +27,12 @@ import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Errors;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Meteor;
-import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
-import com.scizzr.bukkit.plugins.mmocraft.util.MoreString;
-import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Stats;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Update;
+import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
+import com.scizzr.bukkit.plugins.mmocraft.timers.FireballTimer;
+import com.scizzr.bukkit.plugins.mmocraft.util.MoreString;
+import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
 
 public class Main extends JavaPlugin {
     public static Logger log = Logger.getLogger("Minecraft");
@@ -47,7 +47,7 @@ public class Main extends JavaPlugin {
     boolean isScheduled = false;
     int lastTick;
     
-    public static File fileFolder, fileConfigMain, filePlayerData;
+    public static File fileFolder, fileConfigMain, filePlayerData, filePlayerHelpers;
     
     public static YamlConfiguration config;
     
@@ -77,6 +77,20 @@ public class Main extends JavaPlugin {
         
         pm = getServer().getPluginManager();
         
+/*
+        int mon = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        
+        if (mon != 7 || (day != 8 && day != 9) || year != 2012) {
+            log.info(prefixConsole + "-----------------------------------------");
+            log.info(prefixConsole + "Plugin disabled. The beta period is over.");
+            log.info(prefixConsole + "Beta period ended " + mon + "/" + day + "/" + year);
+            log.info(prefixConsole + "-----------------------------------------");
+            pm.disablePlugin(pm.getPlugin(info.getName())); return;
+        }
+*/
+        
         final Blocks listenerBlocks = new Blocks(this); pm.registerEvents(listenerBlocks, this);
         final Entities listenerEntities = new Entities(this); pm.registerEvents(listenerEntities, this);
         final Players listenerPlayers = new Players(this); pm.registerEvents(listenerPlayers, this);
@@ -101,8 +115,10 @@ public class Main extends JavaPlugin {
         filePlayerData = new File(getDataFolder() + slash + "playerData.yml");
         PlayerData.load();
         
+        filePlayerHelpers = new File(getDataFolder() + slash + "playerHelpers.yml");
+        
         // + Extra initialization stuff
-        ClassManager.main(); Wizard.main(); Archer.main();
+        ClassManager.main();
         // - Extra initialization stuff
         
         Vault.setupPermissions();
@@ -134,8 +150,6 @@ public class Main extends JavaPlugin {
                             if (lastTick % 20 == 0) {
                                 lastTick = 0;
                                 
-                                new Thread(new ArrowTimer("countdown", null, null)).start();
-                                
                                 if (meteorPlayer != null) {
                                     new Thread(new Meteor(meteorPlayer)).start();
                                 }
@@ -144,10 +158,10 @@ public class Main extends JavaPlugin {
                                     try { CheatManager.resetClicks(); } catch (Exception ex) { /* suicide(ex); */ }
                                 }
                                 
-                                Wizard.flipTraps(); Archer.flipTurrets();
+                                HelperManager.flipHelpers();
                                 
                                 if (calS % 2 == 0) {
-                                    Archer.fireTurrets();
+                                    HelperManager.fireHelpers();
                                 }
                             }
                             
@@ -164,6 +178,9 @@ public class Main extends JavaPlugin {
                             }
                             
                             if (lastTick % 1 == 0) {
+                                new Thread(new ArrowTimer("countdown", null, null)).start();
+                                new Thread(new FireballTimer("countdown", null, null)).start();
+                                
                                 try { SkillManager.tickCooldown(); } catch (Exception ex) { /* suicide(ex); */ }
                             }
                             

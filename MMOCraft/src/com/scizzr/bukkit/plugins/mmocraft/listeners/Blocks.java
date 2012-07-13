@@ -1,15 +1,19 @@
 package com.scizzr.bukkit.plugins.mmocraft.listeners;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
 import com.scizzr.bukkit.plugins.mmocraft.classes.Archer;
 import com.scizzr.bukkit.plugins.mmocraft.classes.Wizard;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
 
 public class Blocks implements Listener {
     Main plugin;
@@ -27,7 +31,38 @@ public class Blocks implements Listener {
         //p.sendMessage(b.toString());
         //p.sendMessage(b2.toString());
         
-        if (Wizard.isTrap(b)) { Wizard.removeTrap(b, p); } else if (Wizard.isTrap(b2)) { Wizard.removeTrap(b2, p); }
-        if (Archer.isTurret(b)) { Archer.removeTurret(b, p); } else if (Archer.isTurret(b2)) { Archer.removeTurret(b2, p); }
+        if (HelperManager.isHelper(b)) { HelperManager.removeHelper(b, null); }
+        if (HelperManager.isHelper(b2)) { HelperManager.removeHelper(b2, null); }
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
+    public void onBlockPistonExtend(final BlockPistonExtendEvent e) {
+        Block b = e.getBlock();
+        BlockFace bf = e.getDirection();
+        
+        String dir = bf.name();
+        
+        Location loc = b.getLocation().clone(); loc.add(bf.getModX(), bf.getModY(), bf.getModZ());
+        Location diff = new Location(loc.getWorld(), 0, 0, 0);
+        
+        if (     dir.equalsIgnoreCase("NORTH")) diff.add(-1,  0,  0);
+        else if (dir.equalsIgnoreCase("SOUTH")) diff.add(+1,  0,  0);
+        else if (dir.equalsIgnoreCase("DOWN"))  diff.add( 0, -1,  0);
+        else if (dir.equalsIgnoreCase("UP"))    diff.add( 0, +1,  0);
+        else if (dir.equalsIgnoreCase("EAST"))  diff.add( 0,  0, -1);
+        else if (dir.equalsIgnoreCase("WEST"))  diff.add( 0,  0, +1);
+        
+        Location bot = loc.clone();
+        Location top = bot.clone(); top.add(0, +1, 0);
+        
+        for (int i = 0; i <= 12; i ++) {
+            //if (HelperManager.isHelper(b)) { HelperManager.remove(b, p); }
+            if (HelperManager.isHelper(bot.getBlock()) || HelperManager.isHelper(top.getBlock())) {
+                e.setCancelled(true);
+                return;
+            }
+            
+            bot.add(diff); top.add(diff);
+        }
     }
 }

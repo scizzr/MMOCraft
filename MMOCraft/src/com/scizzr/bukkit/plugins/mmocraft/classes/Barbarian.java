@@ -13,7 +13,7 @@ public class Barbarian {
     static int lvlLeap  = 10;
     static int lvlWhirl = 20;
     
-    public static void attackLeft(Player p, Entity t) {
+    public static void attackLeft(Player p, Action a) {
         
     }
     

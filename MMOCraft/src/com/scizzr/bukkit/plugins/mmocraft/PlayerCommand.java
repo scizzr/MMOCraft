@@ -4,6 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
+import com.scizzr.bukkit.plugins.mmocraft.classes.Archer;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Turret;
 import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
 import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
 
@@ -53,7 +56,9 @@ public class PlayerCommand {
             p.chat("/class help");
         } else if (commandLabel.equalsIgnoreCase("mmo")) {
             if (args.length == 1) {
-                if (args[0].equalsIgnoreCase("stats")) {
+                if (args[0].equalsIgnoreCase("tur")) {
+                    p.sendMessage(HelperManager.helpers.toString());
+                } else if (args[0].equalsIgnoreCase("stats")) {
                     int xp = ClassManager.getExp(p);
                     p.sendMessage(Main.prefix + "Class: " + ClassManager.getClassColored(p));
                     p.sendMessage(Main.prefix + "Your level is [" + ClassManager.getLevel(xp) + "] and your XP is [" + xp + "] so far");

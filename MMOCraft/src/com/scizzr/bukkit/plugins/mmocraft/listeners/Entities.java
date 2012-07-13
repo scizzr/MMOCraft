@@ -2,10 +2,10 @@ package com.scizzr.bukkit.plugins.mmocraft.listeners;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.entity.CraftFireball;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SmallFireball;
 import org.bukkit.event.EventHandler;
@@ -18,11 +18,13 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Wizard;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Explosion;
+import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
+import com.scizzr.bukkit.plugins.mmocraft.timers.FireballTimer;
 import com.scizzr.bukkit.plugins.mmocraft.util.MoreMath;
 
 public class Entities implements Listener {
@@ -37,7 +39,11 @@ public class Entities implements Listener {
         Entity ent = e.getEntity();
         Location loc = e.getBlock().getLocation().clone();
         Block b = loc.getBlock();
-        Wizard.stepTrap(ent, b);
+        if (ent instanceof LivingEntity) {
+            if (HelperManager.isHelper(b)) {
+                HelperManager.springWizardTrap(ent, b);
+            }
+        }
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
@@ -56,6 +62,7 @@ public class Entities implements Listener {
             }
         } else if (eAtt instanceof Arrow) {
             if (((Arrow)eAtt).getShooter() instanceof Player) {
+                ArrowTimer.remove((Arrow)eAtt);
                 pAtt = (Player)((Arrow)eAtt).getShooter();
             }
         } else if (eAtt instanceof Player) {
@@ -87,16 +94,24 @@ public class Entities implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onExplosionPrime(final ExplosionPrimeEvent e) {
         Entity exploder = e.getEntity();
-        if (exploder instanceof CraftFireball) {
+        
+        if (exploder instanceof Fireball) {
             Fireball fireball = (Fireball)exploder;
+            
             if (fireball.getShooter() instanceof Player) {
-                Player p = (Player)fireball.getShooter();
-                if (ClassManager.getClass(p).equalsIgnoreCase("wizard")) {
-                    Location loc = fireball.getLocation();
-                    
-                    new Thread(new Explosion(loc)).start();
-                    
+                Player p = (Player) fireball.getShooter();
+                
+                if (FireballTimer.balls.containsKey(fireball)) {
+                    FireballTimer.explodeFireball(fireball);
                     e.setCancelled(true);
+                    
+                    if (ClassManager.getClass(p).equalsIgnoreCase("wizard")) {
+                        Location loc = fireball.getLocation();
+                        
+                        new Thread(new Explosion(loc, false)).start();
+                        
+                        e.setCancelled(true);
+                    }
                 }
             }
         }

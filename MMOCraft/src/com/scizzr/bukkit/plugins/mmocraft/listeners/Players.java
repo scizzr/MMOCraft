@@ -17,6 +17,7 @@ import com.scizzr.bukkit.plugins.mmocraft.Main;
 import com.scizzr.bukkit.plugins.mmocraft.classes.Wizard;
 import com.scizzr.bukkit.plugins.mmocraft.config.Config;
 import com.scizzr.bukkit.plugins.mmocraft.config.PlayerData;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.CheatManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Update;
@@ -36,14 +37,19 @@ public class Players implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(final PlayerInteractEvent e) {
-        if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK) {
+            CheatManager.addClick(e.getPlayer());
+            SkillManager.doAttackLeft(e.getPlayer(), e.getAction());
+        } else if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             CheatManager.addClick(e.getPlayer());
             SkillManager.doAttackRight(e.getPlayer(), e.getAction());
         } else if (e.getAction() == Action.PHYSICAL) {
             Entity ent = e.getPlayer();
             Location loc = e.getClickedBlock().getLocation().clone();
             Block b = loc.getBlock();
-            Wizard.stepTrap(ent, b);
+            if (HelperManager.isHelper(b)) {
+                HelperManager.springWizardTrap(ent, b);
+            }
         }
     }
     
