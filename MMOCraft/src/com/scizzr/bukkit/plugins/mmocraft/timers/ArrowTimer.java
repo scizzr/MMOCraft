@@ -4,12 +4,14 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Explosion;
 
 public class ArrowTimer implements Runnable {
@@ -47,6 +49,17 @@ public class ArrowTimer implements Runnable {
     }
     
     public static void remove(Arrow arrow) {
+//
+        Block b = arrow.getLocation().getBlock();
+        Entity ent = arrow.getShooter();
+        
+        if (HelperManager.isHelper(b)) {
+            if (arrow.getShooter() instanceof Player) {
+                HelperManager.removeHelper(b, arrow.getShooter());
+            }
+            HelperManager.removeHelper(b, ent);
+        }
+//
         arrows.remove(arrow);
         arrow.remove();
     }

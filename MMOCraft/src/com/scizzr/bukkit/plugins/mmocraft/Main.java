@@ -18,12 +18,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.scizzr.bukkit.plugins.mmocraft.config.Config;
 import com.scizzr.bukkit.plugins.mmocraft.config.ConfigMain;
 import com.scizzr.bukkit.plugins.mmocraft.config.PlayerData;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Blocks;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Entities;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Players;
 import com.scizzr.bukkit.plugins.mmocraft.managers.CheatManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Errors;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Meteor;
@@ -118,7 +118,7 @@ public class Main extends JavaPlugin {
         filePlayerHelpers = new File(getDataFolder() + slash + "playerHelpers.yml");
         
         // + Extra initialization stuff
-        ClassManager.main();
+        ClassManager.main(); HelperManager.main();
         // - Extra initialization stuff
         
         Vault.setupPermissions();
@@ -156,12 +156,7 @@ public class Main extends JavaPlugin {
                                 
                                 if (calS == 0) {
                                     try { CheatManager.resetClicks(); } catch (Exception ex) { /* suicide(ex); */ }
-                                }
-                                
-                                HelperManager.flipHelpers();
-                                
-                                if (calS % 2 == 0) {
-                                    HelperManager.fireHelpers();
+                                    PlayerData.save(); HelperManager.saveHelpers();
                                 }
                             }
                             
@@ -182,6 +177,7 @@ public class Main extends JavaPlugin {
                                 new Thread(new FireballTimer("countdown", null, null)).start();
                                 
                                 try { SkillManager.tickCooldown(); } catch (Exception ex) { /* suicide(ex); */ }
+                                HelperManager.countHelpers();
                             }
                             
                             lastTick++;

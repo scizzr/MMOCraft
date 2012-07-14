@@ -28,19 +28,17 @@ public class PlayerData {
         }
     }
     
-    public static void setOpt(Player p, String o, Object v) {
-        config.set(p.getName() + "." + o, v);
-        
+    public static void save() {
         try {
             config.save(Main.filePlayerData);
         } catch (Exception ex) { Main.suicide(ex); }
     }
     
+    public static void setOpt(Player p, String o, Object v) {
+        config.set(p.getName() + "." + o, v);
+    }
+    
     public static Object getOpt(Player p, String o) {
-        try {
-            config.load(Main.filePlayerData);
-        } catch (Exception ex) { Main.log.info(Main.prefixConsole + "Failed to load playerData.yml"); Main.suicide(ex); }
-        
         String val = config.getString(p.getName() + "." + o);
         
         return val != null ? val : null;
@@ -48,10 +46,6 @@ public class PlayerData {
     
     public static void unsetOpt(Player p, String o) {
         config.set(p.getName() + "." + o, null);
-        
-        try {
-            config.save(Main.filePlayerData);
-        } catch (Exception ex) { Main.suicide(ex); }
     }
     
     public static void checkAll(Player p) {

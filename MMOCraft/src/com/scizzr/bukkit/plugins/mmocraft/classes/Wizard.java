@@ -1,23 +1,15 @@
 package com.scizzr.bukkit.plugins.mmocraft.classes;
 
-import java.util.HashMap;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.util.Vector;
 
-import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.Helper;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Turret;
-import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Lightning;
 import com.scizzr.bukkit.plugins.mmocraft.timers.FireballTimer;
@@ -27,33 +19,43 @@ public class Wizard {
     static int lvlWizardMeteor    =  0;
     static int lvlWizardLightning = 10;
     static int lvlWizardFireball  = 20;
-    static int lvlWizardTrap      = 30;
+    static int lvlWizardHelper    = 30;
     
     public static void attackLeft(Player p, Action a) {
-        
+        int exp = ClassManager.getExp(p);
+        int lvl = ClassManager.getLevel(exp);
+        if (a == Action.LEFT_CLICK_AIR) {
+            if (lvl >= lvlWizardHelper) {
+                fireball(p);
+            }
+        } 
     }
     
     public static void attackRight(Player p, Action a) {
+        int exp = ClassManager.getExp(p);
+        int lvl = ClassManager.getLevel(exp);
+        
         if (p.getItemInHand().getType() == Material.STICK) {
-            if (a == Action.LEFT_CLICK_AIR) {
-                if (p.isSneaking()) {
-                    fireball(p);
-                }
-            } else if (a == Action.RIGHT_CLICK_AIR) {
+            if (a == Action.RIGHT_CLICK_AIR) {
                 if (p.getLocation().getPitch() <= -60) {
-                    if (SkillManager.isCooldown(p, "wizard_lightning")) { return; } else { SkillManager.addCooldown(p, "wizard_lightning", 100); }
-                    try { new Thread(new Lightning(p)).start(); } catch (Exception ex) { /* No Spam */ }
+                    if (lvl >= lvlWizardLightning) {
+                        try { new Thread(new Lightning(p)).start(); } catch (Exception ex) { /* No Spam */ }
+                    }
                 } else if (p.getLocation().getPitch() >= 60) {
                     
                 } else {
-                    meteor(p);
+                    if (lvl >= lvlWizardHelper) {
+                        meteor(p);
+                    }
                 }
             } else if (a == Action.RIGHT_CLICK_BLOCK) {
                 if (p.isSneaking()) {
-                    Location loc = p.getTargetBlock(null, 0).getLocation().clone();
-                    Block b = loc.getBlock();
-                    if (b.getLocation().clone().getBlock().getType() != Material.AIR) {
-                        HelperManager.addHelper(p, b);
+                    if (lvl >= lvlWizardHelper) {
+                        Location loc = p.getTargetBlock(null, 0).getLocation().clone();
+                        Block b = loc.getBlock();
+                        if (b.getLocation().clone().getBlock().getType() != Material.AIR) {
+                            helper(p, b);
+                        }
                     }
                 }
             }
@@ -61,6 +63,11 @@ public class Wizard {
     }
     
     
+    
+    public static void helper(Player p, Block b) {
+        if (SkillManager.isCooldown(p, "wizard_helper")) { return; } else { SkillManager.addCooldown(p, "wizard_helper", 100); }
+        HelperManager.addHelper(p, b);
+    }
     
     public static void fireball(Player p) {
         Location loc = p.getLocation();

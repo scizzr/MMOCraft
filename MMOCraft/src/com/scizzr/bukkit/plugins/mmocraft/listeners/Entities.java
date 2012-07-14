@@ -18,9 +18,9 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Explosion;
 import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;

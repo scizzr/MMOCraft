@@ -8,12 +8,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Archer;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Wizard;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 
 public class Blocks implements Listener {
     Main plugin;
@@ -28,11 +27,15 @@ public class Blocks implements Listener {
         Block b = e.getBlock();
         Block b2 = e.getBlock().getLocation().clone().add(0, 1, 0).getBlock();
         
-        //p.sendMessage(b.toString());
-        //p.sendMessage(b2.toString());
-        
-        if (HelperManager.isHelper(b)) { HelperManager.removeHelper(b, null); }
-        if (HelperManager.isHelper(b2)) { HelperManager.removeHelper(b2, null); }
+        if (HelperManager.isHelper(b)) { HelperManager.removeHelper(b, p); }
+        if (HelperManager.isHelper(b2)) { HelperManager.removeHelper(b2, p); }
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
+    public void onBlockPhysics(final BlockPhysicsEvent e) {
+        if (HelperManager.isHelper(e.getBlock())) {
+            e.setCancelled(true);
+        }
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)

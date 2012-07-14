@@ -2,6 +2,7 @@ package com.scizzr.bukkit.plugins.mmocraft.managers;
 
 import java.util.HashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -20,5 +21,23 @@ public class EntityManager {
         if (lastAttacker.containsKey(def)) {
             lastAttacker.remove(def);
         }
+    }
+    
+    public static boolean playerExists(String who) {
+        return Bukkit.getPlayer(who) != null;
+    }
+    
+    public static Player getPlayer(String name) {
+        for (Player onp : Bukkit.getOnlinePlayers()) {
+            if (onp.getName().equalsIgnoreCase(name)) {
+                return onp;
+            }
+        }
+        for (Player onp : Bukkit.getOnlinePlayers()) {
+            if (onp.getName().startsWith(name)) {
+                return onp;
+            }
+        }
+        return null;
     }
 }

@@ -2,6 +2,7 @@ package com.scizzr.bukkit.plugins.mmocraft.managers;
 
 import java.util.HashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.CaveSpider;
@@ -93,6 +94,9 @@ public class ClassManager {
     public static void addExp(Player p, int xp, String why) {
         int old = Integer.valueOf((String) PlayerData.getOpt(p, "experience"));
         PlayerData.setOpt(p, "experience", getExp(p) + xp);
+        
+        if (getLevel(old) >= maxLvl) { return; }
+        
         if (getLevel(old) != getLevel(old+xp)) {
             if (getLevel(old+xp) == maxLvl) {
                 p.getWorld().strikeLightningEffect(p.getLocation().clone().add(0, 10, 0));
@@ -106,30 +110,41 @@ public class ClassManager {
         }
     }
     
+    public static void setExp(String who, int xp) {
+        Player p = (Player)Bukkit.getOfflinePlayer(who);
+        if (p != null) {
+            PlayerData.setOpt(p, "experience", xp);
+            p.sendMessage(Main.prefix + "New EXP: " + xp);
+            p.sendMessage(Main.prefix + "New level: " + getLevel(xp));
+        }
+    }
+    
     public static int getLevel(int exp) {
-        for (int i = 1; i <= 50; i++) {
-            int res = (int) (150*(Math.pow(i, 2))) + (1050*i);
+        for (int i = 1; i <= maxLvl; i++) {
+            int res = (int) (50*(Math.pow(i, 2))) + (75*i);
             if (res > exp) { return i; }
         }
-        return 50;
+        return maxLvl;
     }
     
     public static int getNextLevel(int exp) {
         for (int i = 1; i <= 50; i++) {
-            int res = (int) (150*(Math.pow(i, 2))) + (1050*i);
+            int res = (int) (50*(Math.pow(i, 2))) + (75*i);
             if (res > exp) { if (i < maxLvl) { return i+1; } else { return maxLvl; } }
         }
         return 0;
     }
     
     public static int getNextExp(int exp) {
-        int lvl = getLevel(exp);
-        return (lvl+1 <= maxLvl ? (int) (150*(Math.pow(lvl, 2))) + (1050*lvl) - exp : 0);
+        int i = getLevel(exp);
+        int res = (int) (50*(Math.pow(i, 2))) + (75*i);
+        return (i+1 <= maxLvl ? res - exp : 0);
     }
     
     public static void slayExp(Player eKill, Entity eDead) {
+        int exp = 0;
     // EXP modifier
-        int mod = 10, exp = 0;
+        int mod = 10;
     // Passive
         if (eDead instanceof Chicken) {     exp = mod*4; }
         if (eDead instanceof Cow) {         exp = mod*10; }

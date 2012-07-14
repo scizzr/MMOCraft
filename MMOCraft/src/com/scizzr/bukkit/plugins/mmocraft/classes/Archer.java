@@ -5,25 +5,22 @@ import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftArrow;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.util.Vector;
 
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.Helper;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Turret;
 import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
-import com.scizzr.bukkit.plugins.mmocraft.timers.FireballTimer;
 
 public class Archer {
     static int lvlArcherHalo   =  0;
     static int lvlArcherRing   = 10;
     static int lvlArcherRain   = 20;
-    static int lvlArcherTurret = 30;
+    static int lvlArcherHelper = 30;
     
     static Random rand = new Random();
     
@@ -44,8 +41,8 @@ public class Archer {
                     Location loc = p.getTargetBlock(null, 0).getLocation().clone();
                     Block b = loc.getBlock();
                     if (b.getLocation().clone().getBlock().getType() != Material.AIR) {
-                        if (lvl >= lvlArcherTurret) { 
-                            HelperManager.addHelper(p, b);
+                        if (lvl >= lvlArcherHelper) { 
+                            helper(p, b);
                         }
                     }
                 }
@@ -67,6 +64,11 @@ public class Archer {
     }
     
     
+    
+    public static void helper(Player p, Block b) {
+        if (SkillManager.isCooldown(p, "archer_helper")) { return; } else { SkillManager.addCooldown(p, "archer_helper", 100); }
+        HelperManager.addHelper(p, b);
+    }
     
     public static void arrowRain(Player p, float f) {
         if (SkillManager.isCooldown(p, "archer_rain")) { arrowNormal(p, f); return; } else { SkillManager.addCooldown(p, "archer_rain", 100); }
@@ -104,6 +106,8 @@ public class Archer {
         final Vector direction = eye.getDirection();
         final Arrow arrow = p.getWorld().spawn(eye.add(direction.getX(), direction.getY(), direction.getZ()), Arrow.class);
         arrow.setVelocity(direction.multiply(f*2).add(direction.multiply(0.5))); arrow.setShooter(p);
+        
+        CraftArrow ca = (CraftArrow)arrow; ca.getHandle().fromPlayer = true;
         
         ArrowTimer.add(arrow, 100);
     }

@@ -1,8 +1,13 @@
 package com.scizzr.bukkit.plugins.mmocraft.listeners;
 
+import net.minecraft.server.EntityArrow;
+
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -12,18 +17,23 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.ItemStack;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Wizard;
 import com.scizzr.bukkit.plugins.mmocraft.config.Config;
 import com.scizzr.bukkit.plugins.mmocraft.config.PlayerData;
-import com.scizzr.bukkit.plugins.mmocraft.interfaces.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.CheatManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Update;
 import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
 
 public class Players implements Listener {
+    Location src;
+    Location dest;
+    
+    
     Main plugin;
     
     public Players(Main instance) {
@@ -33,6 +43,15 @@ public class Players implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLogin(final PlayerLoginEvent e) {
         PlayerData.checkAll(e.getPlayer());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerJoin(final PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        
+        if (Config.genVerCheck == true && Vault.hasPermission(p, "newver")) {
+            new Thread(new Update("check", p, null)).start();
+        }
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
@@ -78,11 +97,28 @@ public class Players implements Listener {
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerJoin(final PlayerJoinEvent e) {
+    public void onPlayerPickupItem(final PlayerPickupItemEvent e) {
         Player p = e.getPlayer();
+        ItemStack is = e.getItem().getItemStack();
         
-        if (Config.genVerCheck == true && Vault.hasPermission(p, "newver")) {
-            new Thread(new Update("check", p, null)).start();
+        if (is.getType() == Material.ARROW) {
+            Item it = e.getItem();
+            p.sendMessage("ARROW: " + it.getType().getName());
+            if (it instanceof EntityArrow) {
+                EntityArrow ea = (EntityArrow)it;
+                p.sendMessage("EntityArrow: " + ea.toString());
+            }
+            
+            
+            if (it instanceof CraftItem) {
+                CraftItem ci = (CraftItem)it;
+                p.sendMessage("CraftItem: " + it.getType().getName());
+                if (ci instanceof Entity) {
+                    Entity ent = (Entity)ci;
+                    p.sendMessage("Entity: " + ent.getType().getName());
+                }
+            }
+            //ArrowTimer.remove(arrow);
         }
     }
 }
