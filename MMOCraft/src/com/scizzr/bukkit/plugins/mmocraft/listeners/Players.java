@@ -1,5 +1,7 @@
 package com.scizzr.bukkit.plugins.mmocraft.listeners;
 
+import java.util.UUID;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -7,7 +9,6 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -26,6 +27,7 @@ import com.scizzr.bukkit.plugins.mmocraft.managers.CheatManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Update;
+import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
 import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
 
 public class Players implements Listener {
@@ -102,20 +104,12 @@ public class Players implements Listener {
         ItemStack is = it.getItemStack();
         
         if (is.getType() == Material.ARROW) {
-            p.sendMessage("Item is an arrow");
-            
-            if (it instanceof Projectile) { p.sendMessage("Instanceof Projectile"); }
-            //^ Doesn't do anything
-            
-            if (it instanceof Arrow) { p.sendMessage("Instanceof Arrow"); }
-            //^ Doesn't do anything
-            
-            Projectile pr = (Projectile)it;
-            p.sendMessage(pr.toString());
-            //???
+            UUID id = it.getUniqueId();
+            for (Entity ent : p.getWorld().getEntitiesByClass(Arrow.class)) {
+                if (((Arrow)ent).getUniqueId().equals(id)) {
+                    ArrowTimer.remove((Arrow)ent);
+                }
+            }
         }
-        
-        
-        //ArrowTimer.remove(arrow);
     }
 }
