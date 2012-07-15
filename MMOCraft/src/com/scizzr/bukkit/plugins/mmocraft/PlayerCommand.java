@@ -4,9 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
 import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
 import com.scizzr.bukkit.plugins.mmocraft.util.MoreMath;
 import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
 

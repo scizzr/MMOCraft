@@ -1,14 +1,13 @@
 package com.scizzr.bukkit.plugins.mmocraft.listeners;
 
-import net.minecraft.server.EntityArrow;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.entity.CraftItem;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -99,26 +98,24 @@ public class Players implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPickupItem(final PlayerPickupItemEvent e) {
         Player p = e.getPlayer();
-        ItemStack is = e.getItem().getItemStack();
+        Item it = (Item)e.getItem();
+        ItemStack is = it.getItemStack();
         
         if (is.getType() == Material.ARROW) {
-            Item it = e.getItem();
-            p.sendMessage("ARROW: " + it.getType().getName());
-            if (it instanceof EntityArrow) {
-                EntityArrow ea = (EntityArrow)it;
-                p.sendMessage("EntityArrow: " + ea.toString());
-            }
+            p.sendMessage("Item is an arrow");
             
+            if (it instanceof Projectile) { p.sendMessage("Instanceof Projectile"); }
+            //^ Doesn't do anything
             
-            if (it instanceof CraftItem) {
-                CraftItem ci = (CraftItem)it;
-                p.sendMessage("CraftItem: " + it.getType().getName());
-                if (ci instanceof Entity) {
-                    Entity ent = (Entity)ci;
-                    p.sendMessage("Entity: " + ent.getType().getName());
-                }
-            }
-            //ArrowTimer.remove(arrow);
+            if (it instanceof Arrow) { p.sendMessage("Instanceof Arrow"); }
+            //^ Doesn't do anything
+            
+            Projectile pr = (Projectile)it;
+            p.sendMessage(pr.toString());
+            //???
         }
+        
+        
+        //ArrowTimer.remove(arrow);
     }
 }

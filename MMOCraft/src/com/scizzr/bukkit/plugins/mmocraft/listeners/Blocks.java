@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
 import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
@@ -40,6 +41,37 @@ public class Blocks implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
     public void onBlockPistonExtend(final BlockPistonExtendEvent e) {
+        Block b = e.getBlock();
+        BlockFace bf = e.getDirection();
+        
+        String dir = bf.name();
+        
+        Location loc = b.getLocation().clone(); loc.add(bf.getModX(), bf.getModY(), bf.getModZ());
+        Location diff = new Location(loc.getWorld(), 0, 0, 0);
+        
+        if (     dir.equalsIgnoreCase("NORTH")) diff.add(-1,  0,  0);
+        else if (dir.equalsIgnoreCase("SOUTH")) diff.add(+1,  0,  0);
+        else if (dir.equalsIgnoreCase("DOWN"))  diff.add( 0, -1,  0);
+        else if (dir.equalsIgnoreCase("UP"))    diff.add( 0, +1,  0);
+        else if (dir.equalsIgnoreCase("EAST"))  diff.add( 0,  0, -1);
+        else if (dir.equalsIgnoreCase("WEST"))  diff.add( 0,  0, +1);
+        
+        Location bot = loc.clone();
+        Location top = bot.clone(); top.add(0, +1, 0);
+        
+        for (int i = 0; i <= 12; i ++) {
+            //if (HelperManager.isHelper(b)) { HelperManager.remove(b, p); }
+            if (HelperManager.isHelper(bot.getBlock()) || HelperManager.isHelper(top.getBlock())) {
+                e.setCancelled(true);
+                return;
+            }
+            
+            bot.add(diff); top.add(diff);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
+    public void onBlockPistonRetract(final BlockPistonRetractEvent e) {
         Block b = e.getBlock();
         BlockFace bf = e.getDirection();
         

@@ -160,7 +160,7 @@ public class Main extends JavaPlugin {
                                 }
                             }
                             
-                            if (lastTick % 10 == 0) {
+                            if (lastTick % 5 == 0) {
                                 
                             }
                             

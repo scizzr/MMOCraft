@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
@@ -117,6 +118,8 @@ public class HelperManager {
     }
     
     public static void springWizardTrap(Entity ent, Block b) {
+        if (!(ent instanceof LivingEntity)) { return; }
+        
         Helper help = getHelper(b);
         Player owner = help.getOwner();
         

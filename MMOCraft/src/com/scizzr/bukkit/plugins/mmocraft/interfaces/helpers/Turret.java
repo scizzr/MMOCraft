@@ -8,8 +8,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -94,7 +94,7 @@ public class Turret implements Helper {
     
     public void fire() {
         for (Entity ent : location.getWorld().getEntities()) {
-            if (!(ent instanceof Creature || ent instanceof Player)) { continue; }
+            if (!(ent instanceof LivingEntity)) { continue; }
             
             if (ent instanceof Player) { Player p = (Player)ent; if (owner == p || p.isOp() || p.getGameMode() == GameMode.CREATIVE) { continue; } }
             
