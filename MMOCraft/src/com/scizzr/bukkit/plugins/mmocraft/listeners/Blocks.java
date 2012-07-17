@@ -13,7 +13,7 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
 
 public class Blocks implements Listener {
     Main plugin;
@@ -22,19 +22,19 @@ public class Blocks implements Listener {
         plugin = instance;
     }
     
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockBreak(final BlockBreakEvent e) {
         Player p = e.getPlayer();
         Block b = e.getBlock();
         Block b2 = e.getBlock().getLocation().clone().add(0, 1, 0).getBlock();
         
-        if (HelperManager.isHelper(b)) { HelperManager.removeHelper(b, p); }
-        if (HelperManager.isHelper(b2)) { HelperManager.removeHelper(b2, p); }
+        if (HelperMgr.isHelper(b)) { HelperMgr.removeHelper(b, p); }
+        if (HelperMgr.isHelper(b2)) { HelperMgr.removeHelper(b2, p); }
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
     public void onBlockPhysics(final BlockPhysicsEvent e) {
-        if (HelperManager.isHelper(e.getBlock())) {
+        if (HelperMgr.isHelper(e.getBlock())) {
             e.setCancelled(true);
         }
     }
@@ -60,8 +60,8 @@ public class Blocks implements Listener {
         Location top = bot.clone(); top.add(0, +1, 0);
         
         for (int i = 0; i <= 12; i ++) {
-            //if (HelperManager.isHelper(b)) { HelperManager.remove(b, p); }
-            if (HelperManager.isHelper(bot.getBlock()) || HelperManager.isHelper(top.getBlock())) {
+            //if (HelperMgr.isHelper(b)) { HelperMgr.remove(b, p); }
+            if (HelperMgr.isHelper(bot.getBlock()) || HelperMgr.isHelper(top.getBlock())) {
                 e.setCancelled(true);
                 return;
             }
@@ -91,8 +91,8 @@ public class Blocks implements Listener {
         Location top = bot.clone(); top.add(0, +1, 0);
         
         for (int i = 0; i <= 12; i ++) {
-            //if (HelperManager.isHelper(b)) { HelperManager.remove(b, p); }
-            if (HelperManager.isHelper(bot.getBlock()) || HelperManager.isHelper(top.getBlock())) {
+            //if (HelperMgr.isHelper(b)) { HelperMgr.remove(b, p); }
+            if (HelperMgr.isHelper(bot.getBlock()) || HelperMgr.isHelper(top.getBlock())) {
                 e.setCancelled(true);
                 return;
             }

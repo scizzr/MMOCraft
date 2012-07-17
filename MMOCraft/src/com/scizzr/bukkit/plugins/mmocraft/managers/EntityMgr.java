@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-public class EntityManager {
+public class EntityMgr {
     private static HashMap<Entity, Player> lastAttacker = new HashMap<Entity, Player>();
     
     public static void setAttacker(Entity def, Player att) {

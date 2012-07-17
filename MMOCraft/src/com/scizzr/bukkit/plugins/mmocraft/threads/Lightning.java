@@ -4,7 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.EntityMgr;
 
 public class Lightning implements Runnable {
     Entity e;
@@ -21,7 +21,7 @@ public class Lightning implements Runnable {
                 Location l2 = ee.getLocation().clone(); l2.setPitch(-60);
                 ee.setVelocity(l2.getDirection().multiply(1.25));
                 if (e instanceof Player) {
-                    EntityManager.setAttacker(ee, (Player)e);
+                    EntityMgr.setAttacker(ee, (Player)e);
                 }
             }
         } catch (Exception ex) {

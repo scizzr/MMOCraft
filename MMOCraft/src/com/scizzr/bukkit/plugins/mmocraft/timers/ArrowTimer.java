@@ -10,8 +10,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.EntityMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Explosion;
 
 public class ArrowTimer implements Runnable {
@@ -53,11 +53,11 @@ public class ArrowTimer implements Runnable {
         Block b = arrow.getLocation().getBlock();
         Entity ent = arrow.getShooter();
         
-        if (HelperManager.isHelper(b)) {
+        if (HelperMgr.isHelper(b)) {
             if (arrow.getShooter() instanceof Player) {
-                HelperManager.removeHelper(b, arrow.getShooter());
+                HelperMgr.removeHelper(b, arrow.getShooter());
             }
-            HelperManager.removeHelper(b, ent);
+            HelperMgr.removeHelper(b, ent);
         }
 //
         arrows.remove(arrow);
@@ -74,11 +74,11 @@ public class ArrowTimer implements Runnable {
                 if (ent instanceof Player) {
                     Player p = (Player)ent;
                     if (arrow.getShooter() != p) {
-                        EntityManager.setAttacker(ent, (Player)arrow.getShooter());
+                        EntityMgr.setAttacker(ent, (Player)arrow.getShooter());
                         lent.damage(3);
                     }
                 } else {
-                    EntityManager.setAttacker(ent, (Player)arrow.getShooter());
+                    EntityMgr.setAttacker(ent, (Player)arrow.getShooter());
                     lent.damage(3);
                 }
             }

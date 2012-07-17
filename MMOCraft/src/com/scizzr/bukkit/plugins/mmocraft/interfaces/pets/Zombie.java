@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Pet;
 
-public class PetZombie implements Pet {
+public class Zombie implements Pet {
     private Location location;
     private Player owner;
     private int power = 0;

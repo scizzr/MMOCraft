@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Pet;
 
-public class PetManager {
+public class PetMgr {
     public static ConcurrentHashMap<Pet, Boolean> pets = new ConcurrentHashMap<Pet, Boolean>();
     
     public void tick() {

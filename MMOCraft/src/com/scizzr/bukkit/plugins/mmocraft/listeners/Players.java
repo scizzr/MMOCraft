@@ -23,9 +23,8 @@ import org.bukkit.inventory.ItemStack;
 import com.scizzr.bukkit.plugins.mmocraft.Main;
 import com.scizzr.bukkit.plugins.mmocraft.config.Config;
 import com.scizzr.bukkit.plugins.mmocraft.config.PlayerData;
-import com.scizzr.bukkit.plugins.mmocraft.managers.CheatManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.SkillMgr;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Update;
 import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
 import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
@@ -58,23 +57,22 @@ public class Players implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(final PlayerInteractEvent e) {
         if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK) {
-            CheatManager.addClick(e.getPlayer());
-            SkillManager.doAttackLeft(e.getPlayer(), e.getAction());
+            SkillMgr.doAttackLeft(e.getPlayer(), e);
         } else if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            CheatManager.addClick(e.getPlayer());
-            SkillManager.doAttackRight(e.getPlayer(), e.getAction());
+            SkillMgr.doAttackRight(e.getPlayer(), e);
         } else if (e.getAction() == Action.PHYSICAL) {
             Entity ent = e.getPlayer();
             Location loc = e.getClickedBlock().getLocation().clone();
             Block b = loc.getBlock();
-            if (HelperManager.isHelper(b)) {
-                HelperManager.springWizardTrap(ent, b);
+            if (HelperMgr.isHelper(b)) {
+                HelperMgr.springWizardTrap(ent, b);
             }
         }
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteractEntity(final PlayerInteractEntityEvent e) {
+        SkillMgr.doAttackEntity(e.getPlayer(), e);
 /*
         Player p = e.getPlayer();
         Entity t = e.getRightClicked();
@@ -100,14 +98,14 @@ public class Players implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPickupItem(final PlayerPickupItemEvent e) {
         Player p = e.getPlayer();
-        Item it = (Item)e.getItem();
+        Item it = e.getItem();
         ItemStack is = it.getItemStack();
         
         if (is.getType() == Material.ARROW) {
             UUID id = it.getUniqueId();
             for (Entity ent : p.getWorld().getEntitiesByClass(Arrow.class)) {
                 if (((Arrow)ent).getUniqueId().equals(id)) {
-                    ArrowTimer.remove((Arrow)ent);
+                    ArrowTimer.remove((Arrow)ent); return;
                 }
             }
         }

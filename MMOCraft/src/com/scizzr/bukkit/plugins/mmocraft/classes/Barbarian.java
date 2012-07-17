@@ -1,53 +1,102 @@
 package com.scizzr.bukkit.plugins.mmocraft.classes;
 
-import org.bukkit.Location;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 
-import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
-import com.scizzr.bukkit.plugins.mmocraft.timers.SpinTimer;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.Race;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.skills.BarbarianLeap;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.skills.BarbarianSpin;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.skills.NoneArrow;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
 
-public class Barbarian {
-    static int lvlLeap  = 10;
-    static int lvlWhirl = 20;
+public class Barbarian implements Race {
+    private String player;
+    private int experience;
+    private float dmg = 0;
     
-    public static void attackLeft(Player p, Action a) {
-        
+    public String getName() {
+        return "Barbarian";
     }
     
-    public static void attackRight(Player p, Action a) {
-        int exp = ClassManager.getExp(p);
-        int lvl = ClassManager.getLevel(exp);
-        if (p.getItemInHand().getType() == Material.WOOD_AXE || p.getItemInHand().getType() == Material.IRON_AXE || p.getItemInHand().getType() == Material.GOLD_AXE || p.getItemInHand().getType() == Material.DIAMOND_AXE) {
+    public ChatColor getColor() {
+        return ChatColor.GOLD;
+    }
+    
+    public String getPlayer() {
+        return player;
+    }
+    
+    public void setPlayer(String play) {
+        player = play;
+    }
+    
+    public Integer getExp() {
+        return experience;
+    }
+    
+    public void setExp(int i) {
+        experience = i;
+    }
+    
+    public void attackLeft(Player p, Action a) {
+        //
+    }
+    
+    public void attackRight(Player p, Action a) {
+        if (p.getItemInHand().getType() == Material.WOOD_AXE) {    dmg = 1.5f; }
+        if (p.getItemInHand().getType() == Material.STONE_AXE) {   dmg = 2.0f; }
+        if (p.getItemInHand().getType() == Material.IRON_AXE) {    dmg = 2.5f; }
+        if (p.getItemInHand().getType() == Material.GOLD_AXE) {    dmg = 1.5f; }
+        if (p.getItemInHand().getType() == Material.DIAMOND_AXE) { dmg = 3.0f; }
+        if (dmg > 0) {
+            if (p.isSneaking()) {
+                if (a == Action.RIGHT_CLICK_BLOCK) { skillH(p, p.getTargetBlock(null, 0).getLocation().getBlock()); }
+                return;
+            }
             if (p.getLocation().getPitch() <= -60) {
-                if (lvl >= lvlWhirl) { axeWhirl(p); }
+                skill1(p, 0);
             } else if (p.getLocation().getPitch() >= 60) {
-                if (a == Action.RIGHT_CLICK_BLOCK) {
-                    if (lvl >= lvlLeap) { leapAttack(p); }
-                }
+                skill2(p, 0);
             } else {
-                //clicking normal height
+                //
             }
         }
     }
     
-    
-    
-    public static void axeWhirl(Player p) {
-       SpinTimer.spin(p);
-       for (Entity en : p.getNearbyEntities(3, 3, 3)) {
-           if (en instanceof Player) {
-               ((Player) en).damage(5);
-           }
-       }
+    public void attackBow(Player p, float f) {
+        skillBow(p, f);
     }
     
-    public static void leapAttack(Player p) {
-        //if (p.getLocation().clone().subtract(0, 1, 0).getBlock().getType() != Material.AIR) {
-            Location loc = p.getLocation().clone(); loc.setPitch(-90);
-            p.setVelocity(loc.getDirection()); p.setFallDistance(-5);
-        //}
+    public void attackEntity(Player p, Entity ent) {
+        //
+    }
+    
+    public void skillBow(Player p, float f) {
+        new NoneArrow().execute(p, f);
+    }
+    
+    public void skill0(Player p, float f) {
+        //
+    }
+    
+    public void skill1(Player p, float f) {
+        new BarbarianSpin().execute(p, f);
+    }
+    
+    public void skill2(Player p, float f) {
+        new BarbarianLeap().execute(p, f);
+    }
+    
+    public void skill3(Player p, float f) {
+        //
+    }
+    
+    public void skillH(Player p, Block b) {
+        //if (SkillManager.isCooldown(p, "archer_helper")) { return; } else { SkillManager.addCooldown(p, "archer_helper", 100); }
+        HelperMgr.addHelper(p, b);
     }
 }

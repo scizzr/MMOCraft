@@ -4,7 +4,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.Race;
+import com.scizzr.bukkit.plugins.mmocraft.managers.RaceMgr;
 
 public class PlayerData {
     static YamlConfiguration config = new YamlConfiguration();
@@ -56,11 +57,10 @@ public class PlayerData {
             checkOption(config, p, "eff-pot-self", "true");
             checkOption(config, p, "eff-pot-other", "true");
 */
-            
-            checkOption(config, p, "class", null);
-            checkOption(config, p, "experience", 0);
-            
-            ClassManager.setClass(p, (String)getOpt(p, "class"));
+            Race race = RaceMgr.getRace(p);
+            if (race == null) {
+                RaceMgr.setRace(p, "None");
+            }
             
             config.save(Main.filePlayerData);
         } catch (Exception ex) {

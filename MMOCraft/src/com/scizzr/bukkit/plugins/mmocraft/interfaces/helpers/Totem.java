@@ -2,7 +2,6 @@ package com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers;
 
 import java.util.ArrayList;
 
-import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,26 +9,25 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Helper;
-import com.scizzr.bukkit.plugins.mmocraft.managers.EntityMgr;
-import com.scizzr.bukkit.plugins.mmocraft.util.MoreMath;
 
-public class Forcefield implements Helper {
+public class Totem implements Helper {
     private Location location;
     private Player owner;
-    private int frequency = 40;
+    private int frequency = 100;
     private int counter = 0;
     private int flip = 0;
     
     public String getName() {
-        return "Forcefield";
+        return "Totem";
     }
     
     public ArrayList<String> getBlocks() {
         ArrayList<String> al = new ArrayList<String>();
-        al.add("6:1"); al.add("6:3");
+        al.add("103:0"); al.add("19:0");
         return al;
     }
     
@@ -95,6 +93,8 @@ public class Forcefield implements Helper {
             for (Entity ent : location.getWorld().getEntities()) {
                 if (!(ent instanceof LivingEntity)) { continue; }
                 
+                LivingEntity lent = (LivingEntity)ent;
+                
                 if (ent instanceof Player) { Player p = (Player)ent; if (owner == p || p.isOp() || p.getGameMode() == GameMode.CREATIVE) { continue; } }
                 
                 Location locHelp = location.clone();
@@ -103,17 +103,7 @@ public class Forcefield implements Helper {
                 if (locHelp.distance(locEnt) <= 5) {
                     //if (locHelp.getBlockY() != locEnt.getBlockY()) { continue; }
                     
-                    Location loc = locEnt.clone();
-                    loc.setPitch(5);
-                    loc.setYaw(MoreMath.getYawFromLocToLoc(locHelp, locEnt));
-                    
-                    final Vector direction = loc.getDirection();
-                    
-                    ent.setVelocity(direction);
-                    
-                    locHelp.getWorld().playEffect(locHelp, Effect.ENDER_SIGNAL, 1);
-                    
-                    EntityMgr.setAttacker(ent, owner);
+                    lent.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 2));
                 }
             }
         } catch (Exception ex) {

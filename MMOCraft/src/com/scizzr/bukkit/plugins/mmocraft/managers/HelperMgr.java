@@ -2,6 +2,7 @@ package com.scizzr.bukkit.plugins.mmocraft.managers;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
@@ -16,14 +17,18 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Helper;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Beacon;
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Forcefield;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Sigil;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Totem;
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Trap;
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers.Turret;
 
-public class HelperManager {
+public class HelperMgr extends JavaPlugin {
     public static ConcurrentHashMap<Helper, Boolean> helpers = new ConcurrentHashMap<Helper, Boolean>();
     private static ArrayList<Integer> validBlocks = new ArrayList<Integer>();
     
@@ -43,12 +48,12 @@ public class HelperManager {
         Location locHelp = locClk.clone().add(0, 1, 0);
         
         Helper help = null;
-        if (ClassManager.getClass(p).equalsIgnoreCase("druid"))  { help = new Forcefield(); }
-        if (ClassManager.getClass(p).equalsIgnoreCase("wizard")) { help = new Trap(); }
-        if (ClassManager.getClass(p).equalsIgnoreCase("archer")) { help = new Turret(); }
-        //if (ClassManager.getClass(p).equalsIgnoreCase("archer")) { help = new Turret(); }
-        //if (ClassManager.getClass(p).equalsIgnoreCase("archer")) { help = new Turret(); }
-        //if (ClassManager.getClass(p).equalsIgnoreCase("archer")) { help = new Turret(); }
+        if (RaceMgr.getRaceName(p).equalsIgnoreCase("archer")) { help = new Turret(); }
+        if (RaceMgr.getRaceName(p).equalsIgnoreCase("assassin")) { help = new Sigil(); }
+        if (RaceMgr.getRaceName(p).equalsIgnoreCase("barbarian")) { help = new Beacon(); }
+        if (RaceMgr.getRaceName(p).equalsIgnoreCase("druid"))  { help = new Forcefield(); }
+        if (RaceMgr.getRaceName(p).equalsIgnoreCase("wizard")) { help = new Trap(); }
+        if (RaceMgr.getRaceName(p).equalsIgnoreCase("necromancer")) { help = new Totem(); }
         
         if (locHelp.getBlock().getType() != Material.AIR) {
             p.sendMessage(Main.prefix + "You don't have enough room to build a " + help.getName().toLowerCase() + " there."); return;
@@ -137,6 +142,16 @@ public class HelperManager {
     }
     
     public static boolean loadHelpers() {
+        File file = new File(Main.filePlayerHelpers.getAbsolutePath());
+        if (!Main.filePlayerHelpers.exists()) {
+            try {
+                file.createNewFile();
+                Main.log.info(Main.prefixConsole + "Blank playerHelpers.yml created");
+            } catch (Exception ex) {
+                Main.log.info(Main.prefixConsole + "Failed to make playerHelpers.yml");
+                Main.suicide(ex);
+            }
+        }
         ConcurrentHashMap<Helper, Boolean> mapTmp = helpers;
         try {
             helpers.clear();
@@ -159,12 +174,12 @@ public class HelperManager {
                 Player owner = (Player)Bukkit.getOfflinePlayer(valueA[3]);
                 
                 Helper help = null;
-                if (name.equals("Forcefield")) { help = new Forcefield(); }
-                if (name.equals("Trap")) { help = new Trap(); }
                 if (name.equals("Turret")) { help = new Turret(); }
-                //if (name.equals("Turret")) { help = new Turret(); }
-                //if (name.equals("Turret")) { help = new Turret(); }
-                //if (name.equals("Turret")) { help = new Turret(); }
+                if (name.equals("Sigil")) { help = new Sigil(); }
+                if (name.equals("Beacon")) { help = new Beacon(); }
+                if (name.equals("Forcefield")) { help = new Forcefield(); }
+                if (name.equals("Totem")) { help = new Totem(); }
+                if (name.equals("Trap")) { help = new Trap(); }
                 
                 if (help != null) {
                     help.setLocation(locHelp); help.setOwner(owner); help.setCount(count);

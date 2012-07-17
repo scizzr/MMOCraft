@@ -61,8 +61,10 @@ public class Errors implements Runnable {
             
             stream.close();
         } catch (Exception ex) {
-            Main.log.info(Main.prefixConsole + "Stack trace submission failed.");
-            ex.printStackTrace();
+            Main.log.info(Main.prefixConsole + "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+            Main.log.info(Main.prefixConsole + "Your stack trace could not be submitted. We apologize");
+            Main.log.info(Main.prefixConsole + "for this, however your console still wont get spammed.");
+            Main.log.info(Main.prefixConsole + "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
         }
     }
 }

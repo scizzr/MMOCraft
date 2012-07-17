@@ -14,7 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Helper;
-import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.skills.ArcherRing;
+import com.scizzr.bukkit.plugins.mmocraft.managers.EntityMgr;
 import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
 import com.scizzr.bukkit.plugins.mmocraft.util.MoreMath;
 
@@ -78,7 +79,7 @@ public class Turret implements Helper {
         Block b = location.getBlock();
         
         if (!(getBlocks().contains(b.getTypeId() + ":" + (int)b.getData()) || b.getType() == Material.FIRE)) {
-            //HelperManager.removeHelper(b, null); return;
+            //HelperMgr.removeHelper(b, null); return;
         }
         
         if (flip == 0) {
@@ -93,32 +94,40 @@ public class Turret implements Helper {
     }
     
     public void fire() {
-        for (Entity ent : location.getWorld().getEntities()) {
-            if (!(ent instanceof LivingEntity)) { continue; }
-            
-            if (ent instanceof Player) { Player p = (Player)ent; if (owner == p || p.isOp() || p.getGameMode() == GameMode.CREATIVE) { continue; } }
-            
-            Location locTur = location.clone();
-            Location locEnt = ent.getLocation();
-            
-            if (locTur.distance(locEnt) <= 5) {
-                if (locTur.getBlockY() != locEnt.getBlockY()) { continue; }
+        try {
+            for (Entity ent : location.getWorld().getEntities()) {
+                if (!(ent instanceof LivingEntity)) { continue; }
                 
-                Location loc = locEnt.clone();
-                loc.setPitch(5);
-                loc.setYaw(MoreMath.getYawFromLocToLoc(locTur, locEnt));
+                if (ent instanceof Player) { Player p = (Player)ent; if (owner == p || p.isOp() || p.getGameMode() == GameMode.CREATIVE) { continue; } }
                 
-                final Vector direction = loc.getDirection();
+                Location locTur = location.clone();
+                Location locEnt = ent.getLocation();
                 
-                Arrow arrow = location.getWorld().spawn(locTur.clone().add(0.5, 1.5, 0.5), Arrow.class);
-                arrow.setVelocity(direction); arrow.setShooter(owner); //arrow.setFireTicks(60);
-                
-                locTur.getWorld().playEffect(locTur, Effect.BOW_FIRE, 1);
-                
-                EntityManager.setAttacker(ent, owner);
-                
-                ArrowTimer.add(arrow, 50);
+                if (locTur.distance(locEnt) <= 5) {
+                    if (locTur.getBlockY() != locEnt.getBlockY()) { continue; }
+                    
+                    Location loc = locEnt.clone();
+                    loc.setPitch(5);
+                    loc.setYaw(MoreMath.getYawFromLocToLoc(locTur, locEnt));
+                    
+                    final Vector direction = loc.getDirection();
+                    
+                    Arrow arrow = location.getWorld().spawn(locTur.clone().add(0.5, 1.5, 0.5), Arrow.class);
+                    arrow.setVelocity(direction); arrow.setShooter(owner); //arrow.setFireTicks(60);
+                    
+                    locTur.getWorld().playEffect(locTur, Effect.BOW_FIRE, 1);
+                    
+                    EntityMgr.setAttacker(ent, owner);
+                    
+                    ArrowTimer.add(arrow, 50);
+                }
             }
+        } catch (Exception ex) {
+            /* No Spam */
         }
+    }
+    
+    public void fireWhole() {
+        new ArcherRing().execute(owner, 1);
     }
 }

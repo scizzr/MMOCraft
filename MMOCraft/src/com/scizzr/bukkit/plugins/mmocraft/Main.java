@@ -18,13 +18,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.scizzr.bukkit.plugins.mmocraft.config.Config;
 import com.scizzr.bukkit.plugins.mmocraft.config.ConfigMain;
 import com.scizzr.bukkit.plugins.mmocraft.config.PlayerData;
+import com.scizzr.bukkit.plugins.mmocraft.hooks.HookNCP;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Blocks;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Entities;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Players;
-import com.scizzr.bukkit.plugins.mmocraft.managers.CheatManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.RaceMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.SkillMgr;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Errors;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Meteor;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Stats;
@@ -47,7 +47,7 @@ public class Main extends JavaPlugin {
     boolean isScheduled = false;
     int lastTick;
     
-    public static File fileFolder, fileConfigMain, filePlayerData, filePlayerHelpers;
+    public static File fileFolder, fileConfigMain, filePlayerData, filePlayerClasses, filePlayerHelpers;
     
     public static YamlConfiguration config;
     
@@ -61,6 +61,8 @@ public class Main extends JavaPlugin {
     
     public static File filePlug = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("\\", "/"));
     public static String jar = filePlug.getAbsolutePath().split("/")[filePlug.getAbsolutePath().split("/").length - 1];
+    
+    public final File df = getDataFolder();
     
     public static int calY, calM, calD, calH, calI, calS;
     public static String calA;
@@ -76,6 +78,10 @@ public class Main extends JavaPlugin {
         prefixMain = ChatColor.LIGHT_PURPLE + "[" + ChatColor.YELLOW + info.getName() + ChatColor.LIGHT_PURPLE + "]" + ChatColor.RESET + " ";
         
         pm = getServer().getPluginManager();
+        
+        plugin = pm.getPlugin(info.getName());
+        
+        fileFolder = getDataFolder();
         
 /*
         int mon = Calendar.getInstance().get(Calendar.MONTH) + 1;
@@ -94,10 +100,7 @@ public class Main extends JavaPlugin {
         final Blocks listenerBlocks = new Blocks(this); pm.registerEvents(listenerBlocks, this);
         final Entities listenerEntities = new Entities(this); pm.registerEvents(listenerEntities, this);
         final Players listenerPlayers = new Players(this); pm.registerEvents(listenerPlayers, this);
-        
-        plugin = pm.getPlugin(info.getName());
-        
-        fileFolder = getDataFolder();
+        final HookNCP hookNCP = new HookNCP(this); pm.registerEvents(hookNCP, this);
         
         if (!fileFolder.exists()) {
             log.info(prefixConsole + "Creating our plugin's folder.");
@@ -115,10 +118,11 @@ public class Main extends JavaPlugin {
         filePlayerData = new File(getDataFolder() + slash + "playerData.yml");
         PlayerData.load();
         
+        filePlayerClasses = new File(getDataFolder() + slash + "playerClasses.yml");
         filePlayerHelpers = new File(getDataFolder() + slash + "playerHelpers.yml");
         
         // + Extra initialization stuff
-        ClassManager.main(); HelperManager.main();
+        HelperMgr.main(); RaceMgr.load();
         // - Extra initialization stuff
         
         Vault.setupPermissions();
@@ -155,8 +159,7 @@ public class Main extends JavaPlugin {
                                 }
                                 
                                 if (calS == 0) {
-                                    try { CheatManager.resetClicks(); } catch (Exception ex) { /* suicide(ex); */ }
-                                    PlayerData.save(); HelperManager.saveHelpers();
+                                    PlayerData.save();
                                 }
                             }
                             
@@ -176,13 +179,21 @@ public class Main extends JavaPlugin {
                                 new Thread(new ArrowTimer("countdown", null, null)).start();
                                 new Thread(new FireballTimer("countdown", null, null)).start();
                                 
-                                try { SkillManager.tickCooldown(); } catch (Exception ex) { /* suicide(ex); */ }
-                                HelperManager.countHelpers();
+                                try { SkillMgr.tickCooldown(); } catch (Exception ex) { /* suicide(ex); */ }
+                                HelperMgr.countHelpers();
                             }
                             
                             lastTick++;
                         }
                     }, 0L, 1L);
+            
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(this,
+                    new Runnable() {
+                        public void run() {
+                            HelperMgr.saveHelpers(); RaceMgr.save();
+                        }
+                    }
+            , 0L, 300L);
         }
         
         for (Player p : Bukkit.getOnlinePlayers()) {

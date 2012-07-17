@@ -11,17 +11,23 @@ import org.bukkit.entity.SmallFireball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.managers.ClassManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.EntityManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.HelperManager;
-import com.scizzr.bukkit.plugins.mmocraft.managers.SkillManager;
+import com.scizzr.bukkit.plugins.mmocraft.classes.Barbarian;
+import com.scizzr.bukkit.plugins.mmocraft.classes.Wizard;
+import com.scizzr.bukkit.plugins.mmocraft.enums.Colors;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.Race;
+import com.scizzr.bukkit.plugins.mmocraft.managers.EntityMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.RaceMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.SkillMgr;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Explosion;
 import com.scizzr.bukkit.plugins.mmocraft.timers.ArrowTimer;
 import com.scizzr.bukkit.plugins.mmocraft.timers.FireballTimer;
@@ -40,8 +46,25 @@ public class Entities implements Listener {
         Location loc = e.getBlock().getLocation().clone();
         Block b = loc.getBlock();
         if (ent instanceof LivingEntity) {
-            if (HelperManager.isHelper(b)) {
-                HelperManager.springWizardTrap(ent, b);
+            if (HelperMgr.isHelper(b)) {
+                HelperMgr.springWizardTrap(ent, b);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityDamage(final EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player) {
+            Player p = (Player)e.getEntity();
+            if (e.getCause() == DamageCause.FALL) {
+                Race race = RaceMgr.getRace(p);
+                if (race != null) {
+                    if (race instanceof Barbarian) {
+                        if (p.getFallDistance() <= 4) {
+                            e.setCancelled(true);
+                        }
+                    }
+                }
             }
         }
     }
@@ -70,16 +93,16 @@ public class Entities implements Listener {
         }
         
         if (pAtt != null) {
-            EntityManager.setAttacker(eDef, pAtt);
+            EntityMgr.setAttacker(eDef, pAtt);
             double diff = MoreMath.setDec(pAtt.getLocation().distance(eDef.getLocation()), 2);
             
             if (diff >= 50) {
-                ClassManager.addExp(pAtt, (int)diff, "Nice shot! +%s XP (" + diff + " blocks)");
+                RaceMgr.addExp(pAtt, (int)diff, Colors.WARN + "Nice shot! +%s XP (" + diff + " blocks)");
             }
         }
         
         /*
-        if (PetManager.getMaster(mob) == p) {
+        if (PetMgr.getMaster(mob) == p) {
             LivingEntity len = p.getWorld().spawnCreature(mob.getLocation(), mob.getType());
                 len.setHealth(mob.getHealth());
                 len.setRemainingAir(mob.getRemainingAir());
@@ -105,7 +128,7 @@ public class Entities implements Listener {
                     FireballTimer.explodeFireball(fireball);
                     e.setCancelled(true);
                     
-                    if (ClassManager.getClass(p).equalsIgnoreCase("wizard")) {
+                    if (RaceMgr.getRace(p) instanceof Wizard) {
                         Location loc = fireball.getLocation();
                         
                         new Thread(new Explosion(loc, false)).start();
@@ -121,17 +144,17 @@ public class Entities implements Listener {
     public void onEntityDeath(final EntityDeathEvent e) {
         Entity eDead = e.getEntity();
         
-        if (EntityManager.getAttacker(eDead) != null) {
-            Player p = EntityManager.getAttacker(eDead);
-            ClassManager.slayExp(p, eDead);
-            EntityManager.remove(eDead);
+        if (EntityMgr.getAttacker(eDead) != null) {
+            Player p = EntityMgr.getAttacker(eDead);
+            RaceMgr.slayExp(p, eDead);
+            EntityMgr.remove(eDead);
         }
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityShootBow(final EntityShootBowEvent e) {
         if (e.getEntity() instanceof Player) {
-            SkillManager.doAttackBow((Player)e.getEntity(), e);
+            SkillMgr.doAttackBow((Player)e.getEntity(), e);
         }
     }
 }
