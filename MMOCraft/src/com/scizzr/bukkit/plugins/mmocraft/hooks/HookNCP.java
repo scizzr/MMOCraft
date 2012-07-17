@@ -16,11 +16,6 @@ public class HookNCP extends JavaPlugin implements Listener {
         plugin = instance;
     }
     
-    @Override
-    public void onEnable() {
-        Main.pm.registerEvents(this, this);
-    }
-    
     @EventHandler(priority = EventPriority.MONITOR)
     public void onRunFlyCheck(final RunningCheckEvent e) {
         //

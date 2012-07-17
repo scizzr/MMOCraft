@@ -54,9 +54,9 @@ public class Entities implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDamage(final EntityDamageEvent e) {
-        if (e.getEntity() instanceof Player) {
-            Player p = (Player)e.getEntity();
-            if (e.getCause() == DamageCause.FALL) {
+        if (e.getCause() == DamageCause.FALL) {
+            if (e.getEntity() instanceof Player) {
+                Player p = (Player)e.getEntity();
                 Race race = RaceMgr.getRace(p);
                 if (race != null) {
                     if (race instanceof Barbarian) {
