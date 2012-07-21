@@ -1,15 +1,19 @@
 package com.scizzr.bukkit.plugins.mmocraft;
 
-import org.bukkit.Bukkit;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.plugins.mmocraft.enums.Colors;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.plugins.mmocraft.managers.EntityMgr;
 import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.PetMgr;
 import com.scizzr.bukkit.plugins.mmocraft.managers.RaceMgr;
 import com.scizzr.bukkit.plugins.mmocraft.util.MoreMath;
+import com.scizzr.bukkit.plugins.mmocraft.util.MoreString;
 import com.scizzr.bukkit.plugins.mmocraft.util.Vault;
 
 public class PlayerCommand {
@@ -24,11 +28,11 @@ public class PlayerCommand {
                 }
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("set")) {
-                    if (RaceMgr.getRace(p) != null && !Vault.hasPermission(p, "class.reset")) {
-                        p.sendMessage(Main.prefix + "You are already " + RaceMgr.getRaceNameColoredProper(p));
+                    if (RaceMgr.getRace(p.getName()) != null && !Vault.hasPermission(p, "class.reset")) {
+                        p.sendMessage(Main.prefix + "You are already " + RaceMgr.getRaceNameColoredProper(p.getName()));
                     } else { 
-                        if (args[1].equalsIgnoreCase("none")) { p.sendMessage(Main.prefix + Colors.WARN + "You must select an actual class."); return true; }
-                        RaceMgr.setRace(p, args[1].toLowerCase());
+                        if (args[1].equalsIgnoreCase("none")) { p.sendMessage(Main.prefix + ChatColor.YELLOW + "You must select an actual class."); return true; }
+                        RaceMgr.setRace(p.getName(), args[1].toLowerCase());
                     }
                     return true;
                 } else if (args[0].equalsIgnoreCase("info")) {
@@ -45,27 +49,40 @@ public class PlayerCommand {
             p.chat("/class help");
         } else if (commandLabel.equalsIgnoreCase("mmo")) {
             if (args.length == 1) {
+                if (args[0].equalsIgnoreCase("pets")) {
+                    ConcurrentHashMap<Pet, Boolean> pets = PetMgr.getPlayerPets(p.getName());
+                    for (Entry<Pet, Boolean> entry : pets.entrySet()) {
+                        Pet pet = (Pet)entry.getKey();
+                        p.sendMessage("[" + MoreString.HpFoodBars(pet.getHealth(), ChatColor.DARK_RED, ChatColor.RED, ChatColor.GRAY, true, false, true, true) + "] " + pet.getName());
+                    }
+//XXX +
+                } else if (args[0].equalsIgnoreCase("hungry")) {
+                    p.setFoodLevel(0);
+                } else if (args[0].equalsIgnoreCase("feed")) {
+                    p.setFoodLevel(p.getFoodLevel()+1);
+                }
                 if (args[0].equalsIgnoreCase("race")) { p.sendMessage(RaceMgr.players.toString()); return true; }
                 if (args[0].equalsIgnoreCase("clr")) { RaceMgr.players.clear(); return true; }
+//XXX -
                 if (args[0].equalsIgnoreCase("helpers")) {
                     p.sendMessage(HelperMgr.helpers.toString());
                 } else if (args[0].equalsIgnoreCase("stats")) {
-                    int xp = RaceMgr.getExp(p);
-                    p.sendMessage(Main.prefix + "Class: " + RaceMgr.getRaceNameColored(p));
+                    int xp = RaceMgr.getExp(p.getName());
+                    p.sendMessage(Main.prefix + "Class: " + RaceMgr.getRaceNameColored(p.getName()));
                     p.sendMessage(Main.prefix + "Your level is [" + RaceMgr.getLevel(xp) + "] and your XP is [" + xp + "] so far");
                     p.sendMessage(Main.prefix + "Next level is [" + RaceMgr.getNextLevel(xp) + "] which requires [" + RaceMgr.getNextExp(xp) + "] more XP");
                 }
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("setexp")) {
-                    if (MoreMath.isNum(args[1])) {
-                        RaceMgr.setExp(p, Integer.valueOf(args[1]));
+                    if (MoreMath.isInt(args[1])) {
+                        RaceMgr.setExp(p.getName(), Integer.parseInt(args[1]));
                     } else p.sendMessage(Main.prefix + "Invalid EXP amount.");
                 }
             } else if (args.length == 3) {
                 if (args[0].equalsIgnoreCase("setexp")) {
                     if (EntityMgr.playerExists(args[1])) {
-                        if (MoreMath.isNum(args[2])) {
-                            RaceMgr.setExp(Bukkit.getPlayer(args[1]), Integer.valueOf(args[2]));
+                        if (MoreMath.isInt(args[2])) {
+                            RaceMgr.setExp(args[1], Integer.parseInt(args[2]));
                         } else p.sendMessage(Main.prefix + "Invalid EXP amount.");
                     } else p.sendMessage(Main.prefix + "That player is not online.");
                 }

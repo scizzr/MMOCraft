@@ -3,6 +3,7 @@ package com.scizzr.bukkit.plugins.mmocraft.timers;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
@@ -55,7 +56,7 @@ public class ArrowTimer implements Runnable {
         
         if (HelperMgr.isHelper(b)) {
             if (arrow.getShooter() instanceof Player) {
-                HelperMgr.removeHelper(b, arrow.getShooter());
+                if ((Player)arrow.getShooter() != Bukkit.getPlayer(HelperMgr.getHelper(b).getPlayerName())) { HelperMgr.removeHelper(b, arrow.getShooter()); }
             }
             HelperMgr.removeHelper(b, ent);
         }
@@ -74,11 +75,11 @@ public class ArrowTimer implements Runnable {
                 if (ent instanceof Player) {
                     Player p = (Player)ent;
                     if (arrow.getShooter() != p) {
-                        EntityMgr.setAttacker(ent, (Player)arrow.getShooter());
+                        EntityMgr.setAttacker(ent, ((Player)arrow.getShooter()).getName());
                         lent.damage(3);
                     }
                 } else {
-                    EntityMgr.setAttacker(ent, (Player)arrow.getShooter());
+                    EntityMgr.setAttacker(ent, ((Player)arrow.getShooter()).getName());
                     lent.damage(3);
                 }
             }

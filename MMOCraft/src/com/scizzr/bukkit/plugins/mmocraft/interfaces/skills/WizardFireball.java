@@ -24,7 +24,9 @@ public class WizardFireball implements Skill {
     }
     
     public void execute(Player p, float f) {
-        if (SkillMgr.isCooldown(p, getName())) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
+        if (isCooldown(p)) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
+        if (!isLevel(p)) { return; }
+        
         Location loc = p.getLocation();
         Vector direction = loc.getDirection();
         
@@ -34,12 +36,12 @@ public class WizardFireball implements Skill {
         FireballTimer.addFireball(fb, 30);
     }
     
-    public boolean isCooldown() {
+    public boolean isCooldown(Player p) {
         return false;
     }
     
     public boolean isLevel(Player p) {
-        Race race = RaceMgr.getRace(p);
+        Race race = RaceMgr.getRace(p.getName());
         if (race != null) {
             int exp = race.getExp();
             int lvl = RaceMgr.getLevel(exp);

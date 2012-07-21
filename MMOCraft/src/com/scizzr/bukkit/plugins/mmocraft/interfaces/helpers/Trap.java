@@ -8,11 +8,12 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Helper;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
 
 public class Trap implements Helper {
     private Location location;
-    private Player owner;
-    private int frequency = 20;
+    private String owner;
+    private int frequency = 100;//20
     private int counter = 0;
     private int flip = 0;
     
@@ -34,12 +35,12 @@ public class Trap implements Helper {
         location = loc.clone();
     }
     
-    public Player getOwner() {
+    public String getPlayerName() {
         return owner;
     }
     
-    public void setOwner(Player p) {
-        owner = p;
+    public void setPlayerName(String play) {
+        owner = play;
     }
     
     public Integer getCount() {
@@ -54,7 +55,7 @@ public class Trap implements Helper {
         return true;
     }
     
-    public void count() {
+    public void progress() {
         counter += 1;
         if (counter == frequency || counter == Math.floor(frequency/2)) {
             flip();
@@ -67,9 +68,10 @@ public class Trap implements Helper {
     
     public void flip() {
         Block b = location.getBlock();
+        Block b2 = location.clone().add(0, -1, 0).getBlock();
         
-        if (!(getBlocks().contains(b.getTypeId() + ":" + (int)b.getData()) || b.getType() == Material.FIRE)) {
-            //HelperManager.removeHelper(b, null); return;
+        if (!(getBlocks().contains(b.getTypeId() + ":" + (int)b.getData()) || b.getType() == Material.FIRE) || !(getBlocks().contains(b2.getTypeId() + ":" + (int)b2.getData()) || b2.getType() == Material.FIRE)) {
+            HelperMgr.removeHelper(b, null);
         }
         
         if (flip == 0) {

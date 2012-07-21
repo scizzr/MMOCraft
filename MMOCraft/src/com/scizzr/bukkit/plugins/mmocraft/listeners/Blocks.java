@@ -8,6 +8,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
@@ -32,14 +34,24 @@ public class Blocks implements Listener {
         if (HelperMgr.isHelper(b2)) { HelperMgr.removeHelper(b2, p); }
     }
     
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onBlockIgnite(final BlockIgniteEvent e) {
+        if (e.getCause()== IgniteCause.FIREBALL) {
+            //TODO : Config - disable Blaze fireball fire
+            //if () {
+                e.setCancelled(true);
+            //}
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockPhysics(final BlockPhysicsEvent e) {
         if (HelperMgr.isHelper(e.getBlock())) {
             e.setCancelled(true);
         }
     }
     
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockPistonExtend(final BlockPistonExtendEvent e) {
         Block b = e.getBlock();
         BlockFace bf = e.getDirection();
@@ -70,7 +82,7 @@ public class Blocks implements Listener {
         }
     }
     
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled=true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockPistonRetract(final BlockPistonRetractEvent e) {
         Block b = e.getBlock();
         BlockFace bf = e.getDirection();

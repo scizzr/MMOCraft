@@ -26,7 +26,8 @@ public class WizardMeteor implements Skill {
     }
     
     public void execute(Player p, float f) {
-        if (SkillMgr.isCooldown(p, getName())) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
+        if (isCooldown(p)) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
+        if (!isLevel(p)) { return; }
         
         Block block = p.getTargetBlock(null, 120);
         
@@ -53,12 +54,12 @@ public class WizardMeteor implements Skill {
         FireballTimer.addFireball(fireball, 30);
     }
     
-    public boolean isCooldown() {
+    public boolean isCooldown(Player p) {
         return false;
     }
     
     public boolean isLevel(Player p) {
-        Race race = RaceMgr.getRace(p);
+        Race race = RaceMgr.getRace(p.getName());
         if (race != null) {
             int exp = race.getExp();
             int lvl = RaceMgr.getLevel(exp);

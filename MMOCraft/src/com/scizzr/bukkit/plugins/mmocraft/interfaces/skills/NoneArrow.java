@@ -2,9 +2,11 @@ package com.scizzr.bukkit.plugins.mmocraft.interfaces.skills;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Race;
@@ -28,17 +30,20 @@ public class NoneArrow implements Skill {
         final Arrow arrow = p.getWorld().spawn(eye.add(direction.getX(), direction.getY(), direction.getZ()), Arrow.class);
         arrow.setVelocity(direction.multiply(3.0f)); arrow.setShooter(p);
         
-        if (p.getGameMode() == GameMode.SURVIVAL) { CraftArrow ca = (CraftArrow)arrow; ca.getHandle().fromPlayer = true; }
+        if (p.getGameMode() == GameMode.SURVIVAL) {
+            CraftArrow ca = (CraftArrow)arrow; ca.getHandle().fromPlayer = true;
+            p.getInventory().removeItem(new ItemStack(Material.ARROW, 1));
+        }
         
         ArrowTimer.add(arrow, 100);
     }
     
-    public boolean isCooldown() {
+    public boolean isCooldown(Player p) {
         return false;
     }
     
     public boolean isLevel(Player p) {
-        Race race = RaceMgr.getRace(p);
+        Race race = RaceMgr.getRace(p.getName());
         if (race != null) {
             int exp = race.getExp();
             int lvl = RaceMgr.getLevel(exp);

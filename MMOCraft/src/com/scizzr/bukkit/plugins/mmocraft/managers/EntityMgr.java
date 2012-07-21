@@ -1,19 +1,23 @@
 package com.scizzr.bukkit.plugins.mmocraft.managers;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 public class EntityMgr {
-    private static HashMap<Entity, Player> lastAttacker = new HashMap<Entity, Player>();
+    private static HashMap<Entity, String> lastAttacker = new HashMap<Entity, String>();
+    private static HashMap<UUID, Boolean> spawnerMobs = new HashMap<UUID, Boolean>();
     
-    public static void setAttacker(Entity def, Player att) {
-        lastAttacker.put(def, att);
+    public static void setAttacker(Entity def, String att) {
+        if (!isSpawnerMob(def.getUniqueId())) { lastAttacker.put(def, att); }
     }
     
-    public static Player getAttacker(Entity def) {
+    public static String getAttacker(Entity def) {
         return lastAttacker.containsKey(def) ? lastAttacker.get(def) : null;
     }
     
@@ -39,5 +43,30 @@ public class EntityMgr {
             }
         }
         return null;
+    }
+    
+    public static Entity getEntityByUUID(UUID id) {
+        List<World> worlds = Bukkit.getWorlds();
+        for (int i = 0; i < worlds.size(); i++) {
+            World world = worlds.get(i);
+            for (Entity ent : world.getEntities()) {
+                if (ent.getUniqueId() == id) {
+                    return ent;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean isSpawnerMob(UUID id) {
+        return spawnerMobs.containsKey(id);
+    }
+    
+    public static void addSpawnerMob(UUID id) {
+        spawnerMobs.put(id, true);
+    }
+    
+    public static void removeSpawnerMob(UUID id) {
+        spawnerMobs.remove(id);
     }
 }

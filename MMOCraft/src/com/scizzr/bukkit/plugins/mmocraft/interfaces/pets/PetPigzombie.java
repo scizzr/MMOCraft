@@ -1,57 +1,58 @@
 package com.scizzr.bukkit.plugins.mmocraft.interfaces.pets;
 
+import java.util.UUID;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Pet;
+import com.scizzr.bukkit.plugins.mmocraft.managers.EntityMgr;
 
-public class Zombie implements Pet {
-    private Location location;
-    private Player owner;
+public class PetPigzombie implements Pet {
+    private String owner;
+    private int health = 0;
     private int power = 0;
-    private int food = 0;
-    private String uuid = "";
-    private Entity entity;
+    private int food = 20;
+    private UUID uuid;
     
     public String getName() {
-        return "Zombie";
+        return "Pig Zombie";
     }
     
-    public String getUUID() {
+    public UUID getUUID() {
         return uuid;
     }
     
-    public void setUUID(String id) {
+    public void setUUID(UUID id) {
         uuid = id;
     }
     
-    public Entity getRaw() {
-        return entity;
-    }
-    
-    public void setRaw(Entity ent) {
-        entity = ent;
-    }
-    
     public Location getLocation() {
-        return location;
+        return EntityMgr.getEntityByUUID(uuid).getLocation();
     }
     
     public void teleport(Location loc) {
-        entity.teleport(loc);
+        EntityMgr.getEntityByUUID(uuid).teleport(loc);
     }
     
     public void teleport(Entity ent) {
-        entity.teleport(ent);
+        EntityMgr.getEntityByUUID(uuid).teleport(ent);
     }
     
-    public Player getOwner() {
+    public String getOwnerName() {
         return owner;
     }
     
-    public void setOwner(Player p) {
-        owner = p;
+    public void setOwnerName(String own) {
+        owner = own;
+    }
+    
+    public Integer getHealth() {
+        return health;
+    }
+    
+    public void setHealth(int amt) {
+        health = amt;
     }
     
     public Integer getPower() {

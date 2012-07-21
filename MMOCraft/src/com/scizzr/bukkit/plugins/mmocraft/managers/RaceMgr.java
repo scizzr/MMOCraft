@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.entity.Blaze;
@@ -39,73 +40,72 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 
 import com.scizzr.bukkit.plugins.mmocraft.Main;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Archer;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Assassin;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Barbarian;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Druid;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Necromancer;
-import com.scizzr.bukkit.plugins.mmocraft.classes.None;
-import com.scizzr.bukkit.plugins.mmocraft.classes.Wizard;
-import com.scizzr.bukkit.plugins.mmocraft.enums.Colors;
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Race;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.classes.Archer;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.classes.Assassin;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.classes.Barbarian;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.classes.Druid;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.classes.Necromancer;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.classes.None;
+import com.scizzr.bukkit.plugins.mmocraft.interfaces.classes.Wizard;
 
 public class RaceMgr {
-    private static int maxLvl = 50, expMult = 10;
+    private static int maxLvl = 50, expMult = 1;
     
     //TODO : Private!
     public static ConcurrentHashMap<Race, Boolean> players = new ConcurrentHashMap<Race, Boolean> ();
     
-    public static Race getRace(Player p) {
+    public static Race getRace(String name) {
         for (Entry<Race, Boolean> entry : players.entrySet()) {
             Race race = entry.getKey();
-            if (race.getPlayer().equals(p.getName())) {
+            if (race.getPlayerName().equals(name)) {
                 return race;
             }
         }
         return null;
     }
     
-    public static void setRace(Player p, String s) {
+    public static void setRace(String name, String which) {
         Race race = null;
-        if (s.equalsIgnoreCase("none")) {        race = new None(); }
-        if (s.equalsIgnoreCase("archer")) {      race = new Archer(); }
-        if (s.equalsIgnoreCase("assassin")) {    race = new Assassin(); }
-        if (s.equalsIgnoreCase("barbarian")) {   race = new Barbarian(); }
-        if (s.equalsIgnoreCase("druid")) {       race = new Druid(); }
-        if (s.equalsIgnoreCase("necromancer")) { race = new Necromancer(); }
-        if (s.equalsIgnoreCase("wizard")) {      race = new Wizard(); }
+        if (which.equalsIgnoreCase("none")) {        race = new None(); }
+        if (which.equalsIgnoreCase("archer")) {      race = new Archer(); }
+        if (which.equalsIgnoreCase("assassin")) {    race = new Assassin(); }
+        if (which.equalsIgnoreCase("barbarian")) {   race = new Barbarian(); }
+        if (which.equalsIgnoreCase("druid")) {       race = new Druid(); }
+        if (which.equalsIgnoreCase("necromancer")) { race = new Necromancer(); }
+        if (which.equalsIgnoreCase("wizard")) {      race = new Wizard(); }
         if (race != null) {
-            race.setPlayer(p.getName());
+            PetMgr.removeAllPets(name);
+            
+            race.setPlayerName(name);
             //TODO : Config for 'share EXP amongst all classes'
             //Currently ON
-            if ("a" == "a" && getRace(p) != null) {
-                race.setExp(getExp(p));
-                players.remove(getRace(p));
+            if (getRace(name) != null) {
+                race.setExp(getExp(name));
+                players.remove(getRace(name));
             }
+            //END
             players.put(race, true);
-            p.sendMessage(Main.prefix + Colors.INFO + "Your class has been set to " + RaceMgr.getRaceNameColored(p));
-        } else {
-            p.sendMessage(Main.prefix + Colors.ERROR + "That is not a valid class.");
         }
     }
     
-    public static String getRaceName(Player p) {
-        Race race = getRace(p);
+    public static String getRaceName(String name) {
+        Race race = getRace(name);
         return race != null ? race.getName() : null;
     }
     
-    public static String getRaceNameColored(Player p) {
-        Race race = getRace(p);
+    public static String getRaceNameColored(String name) {
+        Race race = getRace(name);
         return race != null ? race.getColor() + race.getName() + ChatColor.RESET : null;
     }
     
-    public static String getRaceNameProper(Player p) {
-        Race race = getRace(p);
+    public static String getRaceNameProper(String name) {
+        Race race = getRace(name);
         return race != null ? getArticle(race) + " " + race.getName() : null;
     }
     
-    public static String getRaceNameColoredProper(Player p) {
-        Race race = getRace(p);
+    public static String getRaceNameColoredProper(String name) {
+        Race race = getRace(name);
         return race != null ? getArticle(race) + " " + race.getColor() + race.getName() + ChatColor.RESET : null;
     }
     
@@ -117,56 +117,62 @@ public class RaceMgr {
         return "";
     }
     
-    public static void resetRace(Player p) {
-        if (getRace(p) != null) { players.remove(getRace(p)); }
+    public static void resetRace(String name) {
+        if (getRace(name) != null) { players.remove(getRace(name)); }
     }
     
-    public static int getExp(Player p) {
-        return getRace(p).getExp();
+    public static int getExp(String name) {
+        return getRace(name).getExp();
     }
     
-    public static void addExp(Player p, int xp) {
-        addExp(p, xp, String.format("You gained %s XP", xp));
+    public static void addExp(String name, int xp) {
+        addExp(name, xp, String.format("You gained %s XP", xp));
     }
     
-    public static void addExp(Player p, int xp, String why) {
-        int old = getRace(p).getExp();
+    public static void addExp(String name, int xp, String why) {
+        int old = getRace(name).getExp();
         
         if (getLevel(old) >= maxLvl) { return; }
         
-        getRace(p).setExp(old+xp);
+        getRace(name).setExp(old+xp);
         
-        if (getLevel(old) != getLevel(old+xp)) {
-            if (getLevel(old+xp) == maxLvl) {
-                p.getWorld().strikeLightningEffect(p.getLocation().clone().add(0, 10, 0));
+        Player p = Bukkit.getPlayerExact(name);
+        if (p != null) {
+            if (getLevel(old) != getLevel(old+xp)) {
+                if (getLevel(old+xp) == maxLvl) {
+                    p.getWorld().strikeLightningEffect(p.getLocation().clone().add(0, 10, 0));
+                }
+                
+                p.getWorld().playEffect(p.getLocation().clone().add(0.5, 2, 0.5), Effect.POTION_BREAK, 1);
+                p.setHealth(20); p.setFoodLevel(20);
+                
+                p.sendMessage(Main.prefix + ChatColor.AQUA + "Congrats! You are now level " + getLevel(old+xp));
+            } else {
+                p.sendMessage(Main.prefix + String.format(why, xp));
             }
-            
-            p.getWorld().playEffect(p.getLocation().clone().add(0.5, 2, 0.5), Effect.POTION_BREAK, 1);
-            p.setHealth(20); p.setFoodLevel(20);
-            
-            p.sendMessage(Main.prefix + Colors.INFO + "Congrats! You are now level " + getLevel(old+xp));
-        } else {
-            p.sendMessage(Main.prefix + String.format(why, xp));
         }
     }
     
-    public static void setExp(Player p, int xp) {
-        getRace(p).setExp(xp);
-        p.sendMessage(Main.prefix + "New EXP: " + xp);
-        p.sendMessage(Main.prefix + "New level: " + getLevel(xp));
+    public static void setExp(String name, int xp) {
+        getRace(name).setExp(xp);
+        Player p = Bukkit.getPlayerExact(name);
+        if (p != null) {
+            p.sendMessage(Main.prefix + "New EXP: " + xp);
+            p.sendMessage(Main.prefix + "New level: " + getLevel(xp));
+        }
     }
     
     public static int getLevel(int exp) {
         for (int i = 1; i <= maxLvl; i++) {
-            int res = (int) (50*(Math.pow(i, 2))) + (75*i);
+            int res = (int) (50*(Math.pow(i, 2))) + (100*i);
             if (res > exp) { return i; }
         }
         return maxLvl;
     }
     
     public static int getNextLevel(int exp) {
-        for (int i = 1; i <= 50; i++) {
-            int res = (int) (50*(Math.pow(i, 2))) + (75*i);
+        for (int i = 1; i <= maxLvl; i++) {
+            int res = (int) (50*(Math.pow(i, 2))) + (100*i);
             if (res > exp) { if (i < maxLvl) { return i+1; } else { return maxLvl; } }
         }
         return 0;
@@ -174,11 +180,11 @@ public class RaceMgr {
     
     public static int getNextExp(int exp) {
         int i = getLevel(exp);
-        int res = (int) (50*(Math.pow(i, 2))) + (75*i);
+        int res = (int) (50*(Math.pow(i, 2))) + (100*i);
         return (i+1 <= maxLvl ? res - exp : 0);
     }
     
-    public static void slayExp(Player eKill, Entity eDead) {
+    public static void slayExp(String name, Entity eDead) {
         int exp = 0;
     // Passive
         if (eDead instanceof Chicken) {     exp = expMult*4; }
@@ -214,7 +220,7 @@ public class RaceMgr {
     // Player
         if (eDead instanceof Player) {      exp = expMult*5; }
         
-        addExp(eKill, exp, "You earned %s XP for killing a " + eDead.getType().getName());
+        addExp(name, exp, "You earned %s XP for killing a " + eDead.getType().getName());
     }
     
     public static boolean load() {
@@ -254,7 +260,7 @@ public class RaceMgr {
                 if (name.equalsIgnoreCase("wizard")) { race = new Wizard(); }
                 
                 if (race != null) {
-                    race.setPlayer(play); race.setExp(exp);
+                    race.setPlayerName(play); race.setExp(exp);
                     players.put(race, true);
                 }
                 
@@ -275,7 +281,7 @@ public class RaceMgr {
             BufferedWriter writer = new BufferedWriter(new FileWriter(Main.filePlayerClasses));
             for (Entry<Race, Boolean> entry : players.entrySet()) {
                 Race race = entry.getKey();
-                String play = race.getPlayer();
+                String play = race.getPlayerName();
                 String name = race.getName();
                 int exp = race.getExp();
                 

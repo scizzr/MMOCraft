@@ -10,8 +10,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -46,14 +48,15 @@ public class HelperMgr extends JavaPlugin {
     public static void addHelper(Player p, Block b) {
         Location locClk = b.getLocation();
         Location locHelp = locClk.clone().add(0, 1, 0);
+        Block b2 = locHelp.getBlock();
         
         Helper help = null;
-        if (RaceMgr.getRaceName(p).equalsIgnoreCase("archer")) { help = new Turret(); }
-        if (RaceMgr.getRaceName(p).equalsIgnoreCase("assassin")) { help = new Sigil(); }
-        if (RaceMgr.getRaceName(p).equalsIgnoreCase("barbarian")) { help = new Beacon(); }
-        if (RaceMgr.getRaceName(p).equalsIgnoreCase("druid"))  { help = new Forcefield(); }
-        if (RaceMgr.getRaceName(p).equalsIgnoreCase("wizard")) { help = new Trap(); }
-        if (RaceMgr.getRaceName(p).equalsIgnoreCase("necromancer")) { help = new Totem(); }
+        if (RaceMgr.getRaceName(p.getName()).equalsIgnoreCase("archer")) { help = new Turret(); }
+        if (RaceMgr.getRaceName(p.getName()).equalsIgnoreCase("assassin")) { help = new Sigil(); }
+        if (RaceMgr.getRaceName(p.getName()).equalsIgnoreCase("barbarian")) { help = new Beacon(); }
+        if (RaceMgr.getRaceName(p.getName()).equalsIgnoreCase("druid"))  { help = new Forcefield(); }
+        if (RaceMgr.getRaceName(p.getName()).equalsIgnoreCase("wizard")) { help = new Trap(); }
+        if (RaceMgr.getRaceName(p.getName()).equalsIgnoreCase("necromancer")) { help = new Totem(); }
         
         if (locHelp.getBlock().getType() != Material.AIR) {
             p.sendMessage(Main.prefix + "You don't have enough room to build a " + help.getName().toLowerCase() + " there."); return;
@@ -65,23 +68,41 @@ public class HelperMgr extends JavaPlugin {
             p.sendMessage(Main.prefix + "You can't build a " + help.getName().toLowerCase() + " on that block."); return;
         }
         
-        help.setLocation(locHelp.clone()); help.setOwner(p);
+        help.setLocation(locHelp.clone()); help.setPlayerName(p.getName());
+        b2.setTypeId(Integer.valueOf(help.getBlocks().get(0).split(":")[0]));
+        b2.setData(Byte.valueOf(help.getBlocks().get(0).split(":")[0]));
         
         helpers.put(help, true);
         locHelp.getBlock().setTypeIdAndData(51, (byte) 1, true);
-        p.sendMessage(Main.prefix + help.getName() + " added [" + locHelp.getWorld().getName() + ":" + locHelp.getBlockX() + "," + locHelp.getBlockY() + "," + locHelp.getBlockZ() + "]");
+        p.sendMessage(Main.prefix + help.getName() + " added @ [" + locHelp.getWorld().getName() + ":" + locHelp.getBlockX() + "," + locHelp.getBlockY() + "," + locHelp.getBlockZ() + "]");
     }
     
     public static void removeHelper(Block b, Entity ent) {
+        Location loc = b.getLocation();
         Helper help = getHelper(b);
-        helpers.remove(help);
-        
-        b.setType(Material.AIR);
-        
-        if (ent instanceof Player) {
-            Player p = (Player)ent;
-            Location loc = b.getLocation();
-            p.sendMessage(Main.prefix + help.getName() + " removed [" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + "]");
+        if (help != null) {
+            String ownername = help.getPlayerName();
+            helpers.remove(help);
+            b.setType(Material.AIR);
+            
+            OfflinePlayer owner = Bukkit.getOfflinePlayer(ownername);
+            
+            if (ent instanceof Player) {
+                Player p = (Player)ent;
+                
+                if (p != owner) {
+                    p.sendMessage(Main.prefix + "Removed " + RaceMgr.getRace(owner.getName()).getColor() + RaceMgr.getRace(owner.getName()).getColor() + owner.getName() + ChatColor.RESET + "'s " + help.getName() + " @ [" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + "]");
+                    if (owner.isOnline()) {
+                        Bukkit.getPlayer(ownername).sendMessage(Main.prefix + RaceMgr.getRace(p.getName()).getColor() + p.getName() + ChatColor.RESET + " removed your " + help.getName() + " @ [" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + "]");
+                    }
+                } else {
+                    p.sendMessage(Main.prefix + help.getName() + " removed @ [" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + "]");
+                }
+            } else if (ent == null) {
+                if (owner.isOnline()) {
+                    Bukkit.getPlayer(ownername).sendMessage(Main.prefix + help.getName() + " removed @ [" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + "]");
+                }
+            }
         }
     }
     
@@ -115,10 +136,10 @@ public class HelperMgr extends JavaPlugin {
         return false;
     }
     
-    public static void countHelpers() {
+    public static void progressHelpers() {
         for (Entry<Helper, Boolean> entry : helpers.entrySet()) {
             Helper help = entry.getKey();
-            help.count();
+            help.progress();
         }
     }
     
@@ -126,7 +147,8 @@ public class HelperMgr extends JavaPlugin {
         if (!(ent instanceof LivingEntity)) { return; }
         
         Helper help = getHelper(b);
-        Player owner = help.getOwner();
+        String name = help.getPlayerName();
+        Player owner = Bukkit.getPlayer(name);
         
         if (ent instanceof Player) {
             if ((Player)ent == owner) { return; }
@@ -171,7 +193,7 @@ public class HelperMgr extends JavaPlugin {
                     Location locHelp = new Location(w, x, y, z);
                 String name = valueA[1];
                 int count = Integer.valueOf(valueA[2]);
-                Player owner = (Player)Bukkit.getOfflinePlayer(valueA[3]);
+                String ownername = valueA[3];
                 
                 Helper help = null;
                 if (name.equals("Turret")) { help = new Turret(); }
@@ -182,7 +204,7 @@ public class HelperMgr extends JavaPlugin {
                 if (name.equals("Trap")) { help = new Trap(); }
                 
                 if (help != null) {
-                    help.setLocation(locHelp); help.setOwner(owner); help.setCount(count);
+                    help.setLocation(locHelp); help.setPlayerName(ownername); help.setCount(count);
                     helpers.put(help, true);
                 }
                 
@@ -207,7 +229,7 @@ public class HelperMgr extends JavaPlugin {
                         int z = loc.getBlockZ();
                     String name = help.getName();
                     int count = help.getCount();
-                    String owner = help.getOwner().getName();
+                    String owner = help.getPlayerName();
                 
                 writer.write(world + ":" + x + ":" + y + ":" + z + ";" + name + ";" + count + ";" + owner);
                 writer.newLine();

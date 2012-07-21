@@ -10,12 +10,12 @@ public abstract interface Helper {
     public abstract boolean canUse(Player p);
     public abstract Location getLocation();
     public abstract void setLocation(Location loc);
-    public abstract Player getOwner();
-    public abstract void setOwner(Player p);
+    public abstract String getPlayerName();
+    public abstract void setPlayerName(String play);
     public abstract Integer getCount();
     public abstract void setCount(int count);
     public abstract ArrayList<String> getBlocks();
-    public abstract void count();
+    public abstract void progress();
     public abstract void flip();
     public abstract void fire();
 }

@@ -28,7 +28,9 @@ public class AssassinPowerUp implements Skill {
     }
     
     public void execute(final Player p, final float f) {
-        if (SkillMgr.isCooldown(p, getName())) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
+        if (isCooldown(p)) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
+        if (!isLevel(p)) { return; }
+        
         try {
             float num = 0;
             for (Entity ent : p.getNearbyEntities(3, 3, 3)) {
@@ -40,7 +42,7 @@ public class AssassinPowerUp implements Skill {
                 
                 num += 1.0f;
                 
-                EntityMgr.setAttacker(ent, p);
+                EntityMgr.setAttacker(ent, p.getName());
             }
             if (num > 0) {
                 final int total = (int)num;
@@ -57,12 +59,12 @@ public class AssassinPowerUp implements Skill {
         }
     }
     
-    public boolean isCooldown() {
+    public boolean isCooldown(Player p) {
         return false;
     }
     
     public boolean isLevel(Player p) {
-        Race race = RaceMgr.getRace(p);
+        Race race = RaceMgr.getRace(p.getName());
         if (race != null) {
             int exp = race.getExp();
             int lvl = RaceMgr.getLevel(exp);

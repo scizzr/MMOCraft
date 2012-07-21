@@ -72,7 +72,7 @@ public class Players implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteractEntity(final PlayerInteractEntityEvent e) {
-        SkillMgr.doAttackEntity(e.getPlayer(), e);
+        SkillMgr.doInteractEntity(e.getPlayer(), e);
 /*
         Player p = e.getPlayer();
         Entity t = e.getRightClicked();

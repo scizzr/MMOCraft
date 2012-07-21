@@ -3,6 +3,7 @@ package com.scizzr.bukkit.plugins.mmocraft.interfaces.skills;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -17,8 +18,8 @@ import com.scizzr.bukkit.plugins.mmocraft.managers.RaceMgr;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillMgr;
 
 public class BarbarianLeap implements Skill {
-    int cooldown =   0;
-    int lvlReq   =  20;
+    int cooldown =  60;
+    int lvlReq   =  10;
     
     Random rand = new Random();
     
@@ -27,35 +28,39 @@ public class BarbarianLeap implements Skill {
     }
     
     public void execute(final Player p, final float f) {
-        if (SkillMgr.isCooldown(p, getName())) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
+        if (isCooldown(p)) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
+        if (!isLevel(p)) { return; }
+        
         if (p.getLocation().clone().subtract(0, 1, 0).getBlock().getType() != Material.AIR) {
             Location loc = p.getLocation().clone(); loc.setPitch(-90);
             p.setVelocity(loc.getDirection());
-            for (final Entity ent : p.getNearbyEntities(3, 3, 3)) {
-                if (ent instanceof LivingEntity) {
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(Main.pm.getPlugin(Main.info.getName()), new Runnable() {
-                        public void run() {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(Main.pm.getPlugin(Main.info.getName()), new Runnable() {
+                public void run() {
+                    for (final Entity ent : p.getNearbyEntities(3, 3, 3)) {
+                        if (ent instanceof LivingEntity) {
+                            if (ent instanceof Player) { if (((Player)ent).getGameMode() == GameMode.CREATIVE) { continue; } }
+                            
                             Location loc = ent.getLocation().clone(); loc.setPitch(-90);
                             ((LivingEntity)ent).setVelocity(loc.getDirection());
                             Bukkit.getScheduler().scheduleSyncDelayedTask(Main.pm.getPlugin(Main.info.getName()), new Runnable() {
                                 public void run() {
-                                    EntityMgr.setAttacker(ent, p);
+                                    EntityMgr.setAttacker(ent, p.getName());
                                     ((LivingEntity)ent).damage((int)f);
                                 }
                             }, 30L);
                         }
-                    }, 20L);
+                    }
                 }
-            }
+            }, 20L);
         }
     }
     
-    public boolean isCooldown() {
+    public boolean isCooldown(Player p) {
         return false;
     }
     
     public boolean isLevel(Player p) {
-        Race race = RaceMgr.getRace(p);
+        Race race = RaceMgr.getRace(p.getName());
         if (race != null) {
             int exp = race.getExp();
             int lvl = RaceMgr.getLevel(exp);

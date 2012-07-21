@@ -23,6 +23,7 @@ import com.scizzr.bukkit.plugins.mmocraft.listeners.Blocks;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Entities;
 import com.scizzr.bukkit.plugins.mmocraft.listeners.Players;
 import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.PetMgr;
 import com.scizzr.bukkit.plugins.mmocraft.managers.RaceMgr;
 import com.scizzr.bukkit.plugins.mmocraft.managers.SkillMgr;
 import com.scizzr.bukkit.plugins.mmocraft.threads.Errors;
@@ -122,7 +123,7 @@ public class Main extends JavaPlugin {
         filePlayerHelpers = new File(getDataFolder() + slash + "playerHelpers.yml");
         
         // + Extra initialization stuff
-        HelperMgr.main(); RaceMgr.load();
+        HelperMgr.main(); RaceMgr.load(); PetMgr.main();
         // - Extra initialization stuff
         
         Vault.setupPermissions();
@@ -180,7 +181,7 @@ public class Main extends JavaPlugin {
                                 new Thread(new FireballTimer("countdown", null, null)).start();
                                 
                                 try { SkillMgr.tickCooldown(); } catch (Exception ex) { /* suicide(ex); */ }
-                                HelperMgr.countHelpers();
+                                HelperMgr.progressHelpers();
                             }
                             
                             lastTick++;

@@ -57,9 +57,9 @@ public class PlayerData {
             checkOption(config, p, "eff-pot-self", "true");
             checkOption(config, p, "eff-pot-other", "true");
 */
-            Race race = RaceMgr.getRace(p);
+            Race race = RaceMgr.getRace(p.getName());
             if (race == null) {
-                RaceMgr.setRace(p, "None");
+                RaceMgr.setRace(p.getName(), "None");
             }
             
             config.save(Main.filePlayerData);

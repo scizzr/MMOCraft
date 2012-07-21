@@ -2,6 +2,7 @@
   CB 1.2.5 R4
   Initial release
 
+
 Todo
   Detection of solid blocks when placing traps (don't replace whatever is above where the player right-clicks)
   
@@ -14,66 +15,60 @@ Ideas
     • Select a class with '/class <class>'
     • Classes
       o Archer
-        » Pet magma cube
-        » Bow
-          • Left-click to scroll through skills
-          • Right-click (shoot) to use skill
+        » 
       o Assassin
-        » Pet creeper
-        » Sword
-          • Right-click to scroll through skills
-          • Left-click (attack) to use skill
+        » 
       o Barbarian
-        » Pet silverfish
-        » Axe
-          • Right-click to scroll through skills
-          • Left-click (attack) to use skill
+        » 
       o Druid
-        » Pet cave spider
-        » Book
-          • Right-click to scroll through skills
-          • Left-click (punch) to use skill
+        » 
       o Mage
-        » Pet zombie pigman
-        » Stick
-          • Right-click to scroll through skills
-          • Left-click (punch) to use skill
+        » 
       o Necromancer
-        » Pet skeleton
-        » Bone
-          • Right-click to scroll through skills
-          • Left-click (punch) to use skill
+        » 
     • Skills
       o Archer
-        » L  0 > Normal arrow
-        » L 10 > Poison arrow
-        » L 20 > Flaming arrow
-        » L 30 > Exploding arrow
+        » L  0 > Flaming Arrow
+        » L 10 > Arrow Rain
+        » L 20 > Arrow Ring
+        » L 30 > 
+        » L 40 > Turret
+        » L 50 > 
       o Assassain
-        » L  0 > Stealth (sneak to go invis, >3 blocks)
-        » L 10 > Sneak attack (+50% DMG when behind)
-        » L 20 > 
-        » L 30 > Stab attack (+100% DMG if invis and behind)
+TODO        » L  0 > Stab (+50% DMG when sneaking and behind)
+TODO        » L 10 > Stealth (sneak to go invis, >3 blocks)
+TODO        » L 20 > 
+TODO        » L 30 > Sneak Attack (+100% DMG if sneaking and behind and invis)
+        » L 40 > Sigil
+TODO        » L 50 > 
       o Barbarian
-        » L  0 > Normal attack
-        » L 10 > Knockback attack
-        » L 20 > 
-        » L 30 > Whirlwind AoE
+TODO        » L  0 > Tough Skin
+        » L 10 > Leap Attack
+        » L 20 > Spin Attack
+TODO        » L 30 > 
+        » L 40 > Beacon
+TODO        » L 50 > 
       o Druid
-        » L  0 > Heal
-        » L 10 > Improved heal
-        » L 20 > Urgent heal
-        » L 30 > Group heal
-      o Mage
-        » L  0 > Fire bolt
-        » L 10 > Lightning
-        » L 20 > Teleport
-        » L 30 > Fire ball
+        » L  0 > 
+        » L 10 > 
+        » L 20 > 
+        » L 30 > 
+        » L 40 > Forcefield
+        » L 50 > 
       o Necromancer
-        » L  0 > Normal skeleton
-        » L 10 > Flaming skeleton
-        » L 20 > Poison skeleton
-        » L 30 > Blinding skeleton
+        » L  0 > Life Tap
+        » L 10 > Summon Zombie
+        » L 20 > Summon Skeleton
+        » L 30 > Summon Golem
+        » L 40 > Totem
+TODO        » L 50 > 
+      o Wizard
+        » L  0 > Meteor
+        » L 10 > Lightning
+        » L 20 > Fireball
+TODO        » L 30 > Teleport
+        » L 40 > Trap
+TODO        » L 50 > 
     • Pets
       o Delayed respawn if killed by something
       o Will follow and fight with master

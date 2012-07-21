@@ -2,6 +2,7 @@ package com.scizzr.bukkit.plugins.mmocraft.interfaces.helpers;
 
 import java.util.ArrayList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,10 +14,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.scizzr.bukkit.plugins.mmocraft.interfaces.Helper;
+import com.scizzr.bukkit.plugins.mmocraft.managers.EntityMgr;
+import com.scizzr.bukkit.plugins.mmocraft.managers.HelperMgr;
 
 public class Sigil implements Helper {
     private Location location;
-    private Player owner;
+    private String owner;
     private int frequency = 200;
     private int counter = 0;
     private int flip = 0;
@@ -39,12 +42,12 @@ public class Sigil implements Helper {
         location = loc.clone();
     }
     
-    public Player getOwner() {
+    public String getPlayerName() {
         return owner;
     }
     
-    public void setOwner(Player p) {
-        owner = p;
+    public void setPlayerName(String play) {
+        owner = play;
     }
     
     public Integer getCount() {
@@ -59,7 +62,7 @@ public class Sigil implements Helper {
         return true;
     }
     
-    public void count() {
+    public void progress() {
         counter += 1;
         if (counter == frequency || counter == Math.floor(frequency/2)) {
             flip();
@@ -72,9 +75,10 @@ public class Sigil implements Helper {
     
     public void flip() {
         Block b = location.getBlock();
+        Block b2 = location.clone().add(0, -1, 0).getBlock();
         
-        if (!(getBlocks().contains(b.getTypeId() + ":" + (int)b.getData()) || b.getType() == Material.FIRE)) {
-            //HelperMgr.removeHelper(b, null); return;
+        if (!(getBlocks().contains(b.getTypeId() + ":" + (int)b.getData()) || b.getType() == Material.FIRE) || !(getBlocks().contains(b2.getTypeId() + ":" + (int)b2.getData()) || b2.getType() == Material.FIRE)) {
+            HelperMgr.removeHelper(b, null);
         }
         
         if (flip == 0) {
@@ -89,25 +93,30 @@ public class Sigil implements Helper {
     }
     
     public void fire() {
-        try {
-            for (Entity ent : location.getWorld().getEntities()) {
-                if (!(ent instanceof LivingEntity)) { continue; }
-                
-                LivingEntity lent = (LivingEntity)ent;
-                
-                if (ent instanceof Player) { Player p = (Player)ent; if (owner == p || p.isOp() || p.getGameMode() == GameMode.CREATIVE) { continue; } }
-                
-                Location locHelp = location.clone();
-                Location locEnt = ent.getLocation();
-                
-                if (locHelp.distance(locEnt) <= 5) {
-                    //if (locHelp.getBlockY() != locEnt.getBlockY()) { continue; }
+        Player player = Bukkit.getPlayerExact(owner);
+        if (player != null) {
+            try {
+                for (Entity ent : location.getWorld().getEntities()) {
+                    if (!(ent instanceof LivingEntity)) { continue; }
                     
-                    lent.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0));
+                    LivingEntity lent = (LivingEntity)ent;
+                    
+                    if (ent instanceof Player) { Player p = (Player)ent; if (player == p || p.getGameMode() == GameMode.CREATIVE) { continue; } }
+                    
+                    Location locHelp = location.clone();
+                    Location locEnt = ent.getLocation();
+                    
+                    if (locHelp.distance(locEnt) <= 5) {
+                        //if (locHelp.getBlockY() != locEnt.getBlockY()) { continue; }
+                        
+                        lent.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0));
+                        
+                        EntityMgr.setAttacker(ent, owner);
+                    }
                 }
+            } catch (Exception ex) {
+                /* No Spam */
             }
-        } catch (Exception ex) {
-            /* No Spam */
         }
     }
 }

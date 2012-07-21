@@ -21,7 +21,7 @@ public class Lightning implements Runnable {
                 Location l2 = ee.getLocation().clone(); l2.setPitch(-60);
                 ee.setVelocity(l2.getDirection().multiply(1.25));
                 if (e instanceof Player) {
-                    EntityMgr.setAttacker(ee, (Player)e);
+                    EntityMgr.setAttacker(ee, ((Player)e).getName());
                 }
             }
         } catch (Exception ex) {
