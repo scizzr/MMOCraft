@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.scizzr.bukkit.mmocraft.interfaces.Aid;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
@@ -142,6 +143,15 @@ public class Util {
             }
         }
         return str + ChatColor.RESET;
+    }
+    
+    public static ItemStack strToItemStack(String itemstr) {
+        String[] a = itemstr.split("\\ ");
+        String[] b = a[0].split(":");
+        int type  = Integer.valueOf(b[0]);
+        int amount = (a.length == 2 ? Integer.valueOf(a[1]) : 1);
+        short damage = (b.length == 2 ? Short.valueOf(b[1]) : 0);
+        return new ItemStack(type, amount, damage);
     }
     
     
