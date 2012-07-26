@@ -1,6 +1,6 @@
 name: MMOCraft
 version: 1.2.5-R4_b1
-main: com.scizzr.bukkit.plugins.mmocraft.Main
+main: com.scizzr.bukkit.mmocraft.Main
 authors:
   - Scizzr
 softdepend: [Vault]
@@ -14,5 +14,13 @@ commands:
     description: MMO commands
     usage:
       /<command> stats [player] : View player information
+  aids:
+    description: List Aids
+    usage:
+      /<command>                : View your aids
+  pets:
+    description: List pets
+    usage:
+      /<command>                : View your pets
 permissions:
   

@@ -2,59 +2,38 @@
   CB 1.2.5 R4
   Initial release
 
-
-Todo
-  Detection of solid blocks when placing traps (don't replace whatever is above where the player right-clicks)
-  
-
 Ideas
-  Mobs as pets
-    • Right-click a mob with an iron bar once to train it.
-      o Chance of this working is based on the mob's health and the player's Taming level.
   Classes, skills, and pet system
-    • Select a class with '/class <class>'
-    • Classes
-      o Archer
-        » 
-      o Assassin
-        » 
-      o Barbarian
-        » 
-      o Druid
-        » 
-      o Mage
-        » 
-      o Necromancer
-        » 
+    • Select a class with '/class set <class>'
     • Skills
       o Archer
         » L  0 > Flaming Arrow
         » L 10 > Arrow Rain
         » L 20 > Arrow Ring
-        » L 30 > 
+TODO        » L 30 > 
         » L 40 > Turret
-        » L 50 > 
-      o Assassain
-TODO        » L  0 > Stab (+50% DMG when sneaking and behind)
-TODO        » L 10 > Stealth (sneak to go invis, >3 blocks)
-TODO        » L 20 > 
-TODO        » L 30 > Sneak Attack (+100% DMG if sneaking and behind and invis)
-        » L 40 > Sigil
 TODO        » L 50 > 
+      o Assassain
+        » L  0 > Power Up (drain energy from nearby entites to do more damage)
+        » L 10 > Stealth (stand still for 10 seconds to go invis for 10 seconds)
+        » L 20 > Shadow Step (Teleport behind target)
+        » L 30 > Stab (2x DMG when sneaking and behind)
+        » L 40 > Sigil
+        » L 50 > Sneak Attack (3x DMG if sneaking and behind and invis)
       o Barbarian
-TODO        » L  0 > Tough Skin
+        » L  0 > Tough Skin
         » L 10 > Leap Attack
         » L 20 > Spin Attack
 TODO        » L 30 > 
         » L 40 > Beacon
 TODO        » L 50 > 
       o Druid
-        » L  0 > 
-        » L 10 > 
-        » L 20 > 
-        » L 30 > 
+TODO        » L  0 > 
+TODO        » L 10 > 
+TODO        » L 20 > 
+TODO        » L 30 > 
         » L 40 > Forcefield
-        » L 50 > 
+TODO        » L 50 > 
       o Necromancer
         » L  0 > Life Tap
         » L 10 > Summon Zombie
@@ -66,11 +45,10 @@ TODO        » L 50 >
         » L  0 > Meteor
         » L 10 > Lightning
         » L 20 > Fireball
-TODO        » L 30 > Teleport
+TODO        » L 30 > Teleport (Teleport to the player's target block [check with WorldGuard and Factions if they can enter])
         » L 40 > Trap
 TODO        » L 50 > 
     • Pets
-      o Delayed respawn if killed by something
       o Will follow and fight with master
-      o Only attack when master attacks or is attacked
+TODO      o Only attack when master attacks or is attacked
       o 
