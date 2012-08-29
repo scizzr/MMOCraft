@@ -8,7 +8,7 @@ import java.net.URLEncoder;
 
 import org.bukkit.Bukkit;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.config.Config;
 
 public class Stats implements Runnable {
@@ -17,7 +17,7 @@ public class Stats implements Runnable {
     }
     
     public void run() {
-        try { postStats(); } catch(Exception ex) { Main.suicide(ex); }
+        try { postStats(); } catch(Exception ex) { MMOCraft.suicide(ex); }
     }
     
     public void postStats() throws Exception {
@@ -31,11 +31,11 @@ public class Stats implements Runnable {
             ver = Bukkit.getBukkitVersion();
             
             URL url = new URL(
-                String.format("http://www.scizzr.com/plugins/stats.php?") +
+                String.format(MMOCraft.host + "plugins/stats.php?") +
                 String.format("uniqid=" + "%s", URLEncoder.encode(Config.genUniqID, "UTF-8")) + 
-                String.format("&system=" + "%s", URLEncoder.encode(Main.osN, "UTF-8")) +
-                String.format("&plugname=" + "%s", URLEncoder.encode(Main.info.getName(), "UTF-8")) +
-                String.format("&plugver=" + "%s", URLEncoder.encode(Main.info.getVersion(), "UTF-8")) +
+                String.format("&system=" + "%s", URLEncoder.encode(MMOCraft.osN, "UTF-8")) +
+                String.format("&plugname=" + "%s", URLEncoder.encode(MMOCraft.info.getName(), "UTF-8")) +
+                String.format("&plugver=" + "%s", URLEncoder.encode(MMOCraft.info.getVersion(), "UTF-8")) +
                 String.format("&name=" + "%s", URLEncoder.encode(name, "UTF-8")) +
                 String.format("&sip=" + "%s", URLEncoder.encode(sip, "UTF-8")) +
                 String.format("&port=" + "%s", URLEncoder.encode(port, "UTF-8")) +

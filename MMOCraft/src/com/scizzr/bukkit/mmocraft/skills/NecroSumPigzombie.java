@@ -9,7 +9,8 @@ import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
@@ -32,7 +33,7 @@ public class NecroSumPigzombie implements Skill {
     public void execute(Player p, Entity ent, float f) {
         Pet pet = new PetPigzombie();
         
-        if (PetMgr.numPets(p, pet) >= 3) { p.sendMessage(Main.prefix + I18n._("pethasmax", new Object[] {pet.getName()})); return; }
+        if (PetMgr.numPets(p, pet) >= 3) { p.sendMessage(MMOCraft.prefix + I18n._("pethasmax", new Object[] {pet.getName()})); return; }
         
         if (isCooldown(p)) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
         if (!isLevel(p)) { return; }
@@ -50,9 +51,11 @@ public class NecroSumPigzombie implements Skill {
         ((CraftVillager)mob).getHandle().setProfession(5);
 */
         
-        PigZombie mob = (PigZombie)loc.getWorld().spawnCreature(loc, EntityType.PIG_ZOMBIE);
+        PigZombie mob = (PigZombie)loc.getWorld().spawnEntity(loc, EntityType.PIG_ZOMBIE);
         
         pet.setHealth(mob.getHealth()); pet.setUUID(mob.getUniqueId()); pet.setOwnerName(p.getName());
+        
+        SoundEffects.MOB_ZOMBIEPIG_ZPIG.playGlobal(p.getLocation());
         
         PetMgr.addPet(p.getName(), pet);
     }

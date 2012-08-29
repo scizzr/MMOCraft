@@ -1,7 +1,10 @@
 package com.scizzr.bukkit.mmocraft.util;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.prefs.Preferences;
@@ -10,29 +13,102 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import com.scizzr.bukkit.mmocraft.config.Config;
 import com.scizzr.bukkit.mmocraft.interfaces.Aid;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
 
 public class Util {
-//MATH METHODS
-    public static boolean between(double num, double d, double e) {
-        return between(num, d, e, false);
+  //Miscellaneous methods
+    public static boolean classWep(Race race, int itemID) {
+        //Archer
+        List<Integer> arc = Arrays.asList(261);
+        if (race.getName().equalsIgnoreCase("archer")) {      return(arc.contains(itemID)); }
+        
+        //Assassin
+        List<Integer> ass = Arrays.asList(268,283,272,267,276);
+        if (race.getName().equalsIgnoreCase("assassin")) {    return(ass.contains(itemID)); }
+        
+        //Barbarian
+        List<Integer> bar = Arrays.asList(271,286,275,258,279);
+        if (race.getName().equalsIgnoreCase("barbarian")) {   return(bar.contains(itemID)); }
+        
+        //Druid
+        List<Integer> dru = Arrays.asList(340);
+        if (race.getName().equalsIgnoreCase("druid")) {       return(dru.contains(itemID)); }
+        
+        //Necromancer
+        List<Integer> nec = Arrays.asList(352);
+        if (race.getName().equalsIgnoreCase("necromancer")) { return(nec.contains(itemID)); }
+        
+        //Wizard
+        List<Integer> wiz = Arrays.asList(280);
+        if (race.getName().equalsIgnoreCase("wizard")) {      return(wiz.contains(itemID)); }
+        
+        return false;
     }
     
-    public static boolean between(double num, double d, double e, boolean inclusive) {
+    public static String getUniqID() {
+        String path = "com.scizzr.bukkit.shared.UUID";
+        
+        if (Preferences.userRoot().get(path, null) == null) {
+            Preferences.userRoot().put(path, UUID.randomUUID().toString());
+        }
+        
+        return Preferences.userRoot().get(path, null);
+    }
+    
+    public List<Player> getNearbyPlayers(Location loc, int range) {
+        return getNearbyPlayers(loc, range, null);
+    }
+    
+    public static List<Player> getNearbyPlayers(Location loc, int range, Entity ignore) {
+        CopyOnWriteArrayList<Player> near = new CopyOnWriteArrayList<Player>();
+        
+        synchronized(near) {
+            for (Entity ent : loc.getWorld().getEntities()) {
+                if (ent instanceof Player) {
+                    Player p = (Player)ent;
+                    if (p.getLocation().distance(loc) <= range) {
+                        if (ignore != null && ignore == p) {
+                            near.add(p);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return near;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    //Math Methods
+    public static boolean between(double num, double low, double hi) {
+        return between(num, low, hi, false);
+    }
+    
+    public static boolean between(double num, double low, double hi, boolean inclusive) {
         if (inclusive) {
-            if (d <= num && num <= e) {
+            if (low <= num && num <= hi) {
                 return true;
             }
             return false;
         } else {
-            if (d < num && num < e) {
+            if (low < num && num < hi) {
                 return true;
             }
             return false;
@@ -67,25 +143,37 @@ public class Util {
         return r;
     }
     
-    public static Integer angleToPitch(Integer angle) {
+    public static int angleToPitch(Integer angle) {
         if ((angle - 90) <= 180) return (angle - 90) * -1;
         else return 180 - (angle + 90);
     }
     
-    public static float getYawFromLocToLoc(Location locSrc, Location locDest) {
-        double a = locDest.getBlockX()-locSrc.getBlockX();
-        double b = locDest.getBlockZ()-locSrc.getBlockZ();
-        //double c = Math.sqrt((a*a) + (b*b));
+    public static int calcBaseDamage(ItemStack items) {
+        int id = items.getTypeId();
+        HashMap<Integer, Integer> dmgs = new HashMap<Integer, Integer>();
+        //Shovels
+        dmgs.put(269, 1); dmgs.put(284, 1); dmgs.put(273, 2); dmgs.put(256, 3); dmgs.put(277, 4);
+        //Picks
+        dmgs.put(270, 2); dmgs.put(285, 2); dmgs.put(274, 3); dmgs.put(257, 4); dmgs.put(278, 5);
+        //Axes
+        dmgs.put(271, 3); dmgs.put(286, 3); dmgs.put(275, 4); dmgs.put(258, 5); dmgs.put(279, 6);
+        //Swords
+        dmgs.put(268, 4); dmgs.put(283, 4); dmgs.put(272, 5); dmgs.put(267, 6); dmgs.put(276, 7);
+        //everything else is 1 dmg!
+        return dmgs.containsKey(id) ? dmgs.get(id) : 1;
+    }
+    
+    public static int calcDamage(Race race, int dmg2, boolean classWep) {
+        int dmg = 1;
         
-        double t = Math.atan(a/b);
+        if (race.getName().equalsIgnoreCase("archer")) {      dmg = dmg2 + (classWep ? Config.arcDmgClass : Config.arcDmgOther); }
+        if (race.getName().equalsIgnoreCase("assassin")) {    dmg = dmg2 + (classWep ? Config.assDmgClass : Config.assDmgOther); }
+        if (race.getName().equalsIgnoreCase("barbarian")) {   dmg = dmg2 + (classWep ? Config.barDmgClass : Config.barDmgOther); }
+        if (race.getName().equalsIgnoreCase("druid")) {       dmg = dmg2 + (classWep ? Config.druDmgClass : Config.druDmgOther); }
+        if (race.getName().equalsIgnoreCase("necromancer")) { dmg = dmg2 + (classWep ? Config.necDmgClass : Config.necDmgOther); }
+        if (race.getName().equalsIgnoreCase("wizard")) {      dmg = dmg2 + (classWep ? Config.wizDmgClass : Config.wizDmgOther); }
         
-        double A = t * (180/Math.PI);
-        //double B = 180 - A - 90.0;
-        //double C = 90.0;
-        
-        int add = locSrc.getBlockZ() <= locDest.getBlockZ() ? 360 : 180;
-        
-        return (add-(float) A);
+        return (dmg > 0 ? dmg : 1);
     }
     
     
@@ -163,7 +251,27 @@ public class Util {
     
     
     
-//LOCATION METHODS
+//Location Methods
+    public static float getYawFromLocToLoc(Location locSrc, Location locDest) {
+        double a = locDest.getBlockX()-locSrc.getBlockX();
+        double b = locDest.getBlockZ()-locSrc.getBlockZ();
+        //double c = Math.sqrt((a*a) + (b*b));
+        
+        double t = Math.atan(a/b);
+        
+        double A = t * (180/Math.PI);
+        //double B = 180 - A - 90.0;
+        //double C = 90.0;
+        
+        int add = locSrc.getBlockZ() <= locDest.getBlockZ() ? 360 : 180;
+        
+        return (add-(float) A);
+    }
+    
+    public static boolean hasSight(LivingEntity look, LivingEntity hide) {
+        return (look.getLineOfSight(null, 120).contains(hide) ? true : false);
+    }
+    
     public static Location stringToLocation(String s, String sep) {
         return stringToLocation(s, sep, false, false);
     }
@@ -187,6 +295,7 @@ public class Util {
     public static String locationToString(Location loc, String sep1, String sep2) {
         return locationToString(loc, sep1, sep2, false, false);
     }
+    
     public static String locationToString(Location loc, String sep1, String sep2, boolean doPitch, boolean doYaw) {
         return loc.getWorld().getName() + sep1 + loc.getBlockX() + sep2 + loc.getBlockY() + sep2 + loc.getBlockZ() + (doPitch ? sep2 + loc.getPitch() : "") + (doYaw ? sep2 + loc.getYaw() : "");
     }
@@ -223,6 +332,13 @@ public class Util {
         return (xyz && (doPitch ? pit : true) && (doYaw ? yaw : true));
     }
     
+    public static boolean isBehind(Entity back, Entity frnt) {
+        //Voodoo to check if the player is facing the same direction as their target (aka behind) when attacking
+        Location locB = frnt.getLocation(); float yawB = locB.getYaw(); if (yawB < 0) { yawB += 360; } yawB %= 360; int dirBack = (int)((yawB+8)/22.5);
+        Location locF = back.getLocation(); float yawF = locF.getYaw(); if (yawF < 0) { yawF += 360; } yawF %= 360; int dirFrnt = (int)((yawF+8)/22.5);
+        
+        return (Util.between(dirBack, dirFrnt-1, dirFrnt+1, true));
+    }
     
     
     
@@ -249,26 +365,6 @@ public class Util {
                 pets.remove(pet);
             }
         }
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-//Miscellaneous methods
-    public static String getUniqID() {
-        String path = "com.scizzr.bukkit.shared.UUID";
-        
-        if (Preferences.userRoot().get(path, null) == null) {
-            Preferences.userRoot().put(path, UUID.randomUUID().toString());
-        }
-        
-        return Preferences.userRoot().get(path, null);
     }
     
     

@@ -1,6 +1,6 @@
 name: MMOCraft
-version: 1.2.5-R4_b1
-main: com.scizzr.bukkit.mmocraft.Main
+version: 1.3.1-R2_b1
+main: com.scizzr.bukkit.mmocraft.MMOCraft
 authors:
   - Scizzr
 softdepend: [Vault]
@@ -15,12 +15,16 @@ commands:
     usage:
       /<command> stats [player] : View player information
   aids:
-    description: List Aids
+    description: List aids
     usage:
       /<command>                : View your aids
   pets:
     description: List pets
     usage:
       /<command>                : View your pets
+  eff:
+    description: Sound effects
+    usage:
+      /<command> [type] [name]  : Play an effect
 permissions:
   

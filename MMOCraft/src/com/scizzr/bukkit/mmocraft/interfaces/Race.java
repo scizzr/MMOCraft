@@ -7,6 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 public abstract interface Race {
@@ -30,7 +31,7 @@ public abstract interface Race {
     public abstract void setData(String key, Object val);
     public abstract boolean hasData(String key);
     
-    public abstract void attackLeft(Player p, Action a);
+    public abstract void attackLeft(Player p, PlayerInteractEvent e);
     public abstract void attackRight(Player p, Action a);
     public abstract void attackBow(Player p, float f);
     public abstract void attackEntity(Player p, EntityDamageByEntityEvent e);

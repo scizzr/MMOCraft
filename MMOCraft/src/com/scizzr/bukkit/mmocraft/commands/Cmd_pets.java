@@ -4,7 +4,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.interfaces.Cmd;
 import com.scizzr.bukkit.mmocraft.managers.PetMgr;
 import com.scizzr.bukkit.mmocraft.util.I18n;
@@ -19,6 +19,6 @@ public class Cmd_pets implements Cmd {
     }
     
     public void execute(CommandSender s, Command cmd, String cmdLbl, String[] args) {
-        s.sendMessage(Main.prefix + I18n._("playersonly", new Object[] {}));
+        s.sendMessage(MMOCraft.prefix + I18n._("playersonly", new Object[] {}));
     }
 }

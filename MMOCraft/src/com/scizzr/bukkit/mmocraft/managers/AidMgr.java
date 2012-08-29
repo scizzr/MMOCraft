@@ -1,10 +1,5 @@
 package com.scizzr.bukkit.mmocraft.managers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,14 +10,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.aids.Beacon;
 import com.scizzr.bukkit.mmocraft.aids.Forcefield;
 import com.scizzr.bukkit.mmocraft.aids.Sigil;
@@ -35,6 +29,7 @@ import com.scizzr.bukkit.mmocraft.classes.Barbarian;
 import com.scizzr.bukkit.mmocraft.classes.Druid;
 import com.scizzr.bukkit.mmocraft.classes.Necromancer;
 import com.scizzr.bukkit.mmocraft.classes.Wizard;
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
 import com.scizzr.bukkit.mmocraft.interfaces.Aid;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.util.I18n;
@@ -51,8 +46,6 @@ public class AidMgr extends JavaPlugin {
         for (int i = 0; i < split.length; i++) {
             validBlocks.add(Integer.valueOf(split[i]));
         }
-        
-        loadAids();
     }
     
     public static void addAid(Player p, Block b) {
@@ -61,10 +54,12 @@ public class AidMgr extends JavaPlugin {
         int num = Integer.valueOf(numAids(p));
         if (num >= race.getMaxAids()) {
 //TODO: Permission - Bypass max Aid number
-            //if (!Vault.hasPermission(p, "")) {
-                p.sendMessage(Main.prefix + I18n._("aidhasmax", new Object[] {}));
+            /*
+            if (!Vault.hasPermission(p, "")) {
+                p.sendMessage(MMOCraft.prefix + I18n._("aidhasmax", new Object[] {}));
                 return;
-            //}
+            }
+            */
 //TODO
         }
         
@@ -81,13 +76,13 @@ public class AidMgr extends JavaPlugin {
         if (race instanceof Wizard)      { aid = new Trap();       }
         
         if (locAid.getBlock().getType() != Material.AIR) {
-            p.sendMessage(Main.prefix + I18n._("aidnoroom", new Object[] {aid.getName().toLowerCase()})); return;
+            p.sendMessage(MMOCraft.prefix + I18n._("aidnoroom", new Object[] {aid.getName().toLowerCase()})); return;
         } else if (isAid(locClk.getBlock())) {
-            p.sendMessage(Main.prefix + I18n._("aidalready", new Object[] {getAid(locClk.getBlock()).getName().toLowerCase()})); return;
+            p.sendMessage(MMOCraft.prefix + I18n._("aidalready", new Object[] {getAid(locClk.getBlock()).getName().toLowerCase()})); return;
         } else if (isAid(locAid.getBlock())) {
-            p.sendMessage(Main.prefix + I18n._("aidalready", new Object[] {getAid(locAid.getBlock()).getName().toLowerCase()})); return;
+            p.sendMessage(MMOCraft.prefix + I18n._("aidalready", new Object[] {getAid(locAid.getBlock()).getName().toLowerCase()})); return;
         } else if (!validBlocks.contains(locClk.getBlock().getTypeId())) {
-            p.sendMessage(Main.prefix + I18n._("aidcannot", new Object[] {aid.getName().toLowerCase()})); return;
+            p.sendMessage(MMOCraft.prefix + I18n._("aidcannot", new Object[] {aid.getName().toLowerCase()})); return;
         }
         
         aid.setLocation(locAid.clone()); aid.setOwnerName(p.getName());
@@ -101,7 +96,8 @@ public class AidMgr extends JavaPlugin {
         
         locAid.getBlock().setTypeIdAndData(51, (byte) 1, true);
         
-        p.sendMessage(Main.prefix + I18n._("aidadd", new Object[] {aid.getName(), locAid.getWorld().getName() + ":" + locAid.getBlockX() + "," + locAid.getBlockY() + "," + locAid.getBlockZ()}));
+        SoundEffects.LIQUID_LAVAPOP.play(p, p.getLocation());
+        p.sendMessage(MMOCraft.prefix + I18n._("aidadd", new Object[] {aid.getName(), locAid.getWorld().getName() + ":" + locAid.getBlockX() + "," + locAid.getBlockY() + "," + locAid.getBlockZ()}));
     }
     
     public static void removeAid(Block b, Entity ent, boolean remove) {
@@ -125,16 +121,18 @@ public class AidMgr extends JavaPlugin {
                 Player p = (Player)ent;
                 
                 if (p != owner) {
-                    p.sendMessage(Main.prefix + I18n._("aidremo", new Object[] {RaceMgr.getRace(owner.getName()).getColor() + owner.getName() + ChatColor.RESET, aid.getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
+                    p.sendMessage(MMOCraft.prefix + I18n._("aidremo", new Object[] {RaceMgr.getRace(owner.getName()).getColor() + owner.getName() + ChatColor.RESET, aid.getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
                     if (owner.isOnline()) {
-                        Bukkit.getPlayer(ownername).sendMessage(Main.prefix + I18n._("aidrem", new Object[] {RaceMgr.getRace(p.getName()).getColor() + p.getName() + ChatColor.RESET, aid.getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
+                        Bukkit.getPlayer(ownername).sendMessage(MMOCraft.prefix + I18n._("aidrem", new Object[] {RaceMgr.getRace(p.getName()).getColor() + p.getName() + ChatColor.RESET, aid.getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
                     }
                 } else {
-                    p.sendMessage(Main.prefix + I18n._("aidrem", new Object[] {aid.getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
+                    p.sendMessage(MMOCraft.prefix + I18n._("aidrem", new Object[] {aid.getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
                 }
+                
+                SoundEffects.RANDOM_POP.play(p, p.getLocation());
             } else if (ent == null) {
                 if (owner.isOnline()) {
-                    Bukkit.getPlayer(ownername).sendMessage(Main.prefix + I18n._("aidrem", new Object[] {aid.getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
+                    Bukkit.getPlayer(ownername).sendMessage(MMOCraft.prefix + I18n._("aidrem", new Object[] {aid.getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
                 }
             }
         }
@@ -172,13 +170,13 @@ public class AidMgr extends JavaPlugin {
     public static void listAids(Player p) {
         List<Aid> aidsPlayer = getPlayerAids(p.getName());
         
-        if (aidsPlayer.size() == 0) { p.sendMessage(Main.prefix + I18n._("aidhasnone", new Object[] {})); return; }
+        if (aidsPlayer.size() == 0) { p.sendMessage(MMOCraft.prefix + I18n._("aidhasnone", new Object[] {})); return; }
         
         Iterator<Aid> it = aidsPlayer.iterator();
         while (it.hasNext()) {
             Aid aid = it.next();
             if (aid.getOwnerName().equalsIgnoreCase(p.getName())) {
-                p.sendMessage(Main.prefix + Util.displayAidInfo(p, aid));
+                p.sendMessage(MMOCraft.prefix + Util.displayAidInfo(p, aid));
             }
         }
     }
@@ -223,9 +221,9 @@ public class AidMgr extends JavaPlugin {
         if (owner.isOnline()) {
             Location loc = b.getLocation();
             if (ent instanceof Player) {
-                owner.sendMessage(Main.prefix + I18n._("trapstepplay", new Object[] {ent.getType().getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
+                owner.sendMessage(MMOCraft.prefix + I18n._("trapstepplay", new Object[] {ent.getType().getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
             } else {
-                owner.sendMessage(Main.prefix + I18n._("trapstepmob", new Object[] {((Player)ent).getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
+                owner.sendMessage(MMOCraft.prefix + I18n._("trapstepmob", new Object[] {((Player)ent).getName(), loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()}));
             }
         }
     }
@@ -248,93 +246,12 @@ public class AidMgr extends JavaPlugin {
         Race race = RaceMgr.getRace(name);
         return race.getAids();
     }
-    
-    public static boolean loadAids() {
-        File file = new File(Main.filePlayerAids.getAbsolutePath());
-        
-        if (!Main.filePlayerAids.exists()) {
-            try {
-                file.createNewFile();
-                Main.log.info(Main.prefixConsole + I18n._("succeedyml", new Object[] {file.getName()}));
-            } catch (Exception ex) {
-                Main.log.info(Main.prefixConsole + I18n._("failedyml", new Object[] {file.getName()}));
-                Main.suicide(ex);
-            }
-        }
-        
-        CopyOnWriteArrayList<Aid> setTmp = aids;
-        
-        try {
-            synchronized(aids) {
-                aids.clear();
-                BufferedReader reader = new BufferedReader(new FileReader(Main.filePlayerAids));
-                String line = reader.readLine();
-                
-                while (line != null) {
-                    String[] valueA = line.split(";");
-                    if (valueA.length != 4) { continue; }
-                    String owner = valueA[0];
-                    String name = valueA[1];
-                    int count = Integer.valueOf(valueA[2]);
-                    String loc = valueA[3];
-                        String[] valueB = loc.split(":");
-                        if (valueB.length != 4) { continue; }
-                        World w = Bukkit.getWorld(valueB[0]);
-                        int x = Integer.valueOf(valueB[1]);
-                        int y = Integer.valueOf(valueB[2]);
-                        int z = Integer.valueOf(valueB[3]);
-                        Location locAid = new Location(w, x, y, z);
-                    
-                    Aid aid = null;
-                    if (name.equals("Turret")) {     aid = new Turret(); }
-                    if (name.equals("Sigil")) {      aid = new Sigil(); }
-                    if (name.equals("Beacon")) {     aid = new Beacon(); }
-                    if (name.equals("Forcefield")) { aid = new Forcefield(); }
-                    if (name.equals("Totem")) {      aid = new Totem(); }
-                    if (name.equals("Trap")) {       aid = new Trap(); }
-                    
-                    if (aid != null) {
-                        aid.setLocation(locAid); aid.setOwnerName(owner); aid.setCount(count);
-                        
-                        aids.add(aid);
-                        
-                        RaceMgr.getRace(owner).addAid(aid);
-                    }
-                    
-                    line = reader.readLine();
-                }
-            }
-            return true;
-        } catch (Exception ex) {
-//XXX : Remove?
-            //Main.suicide(ex);
-            aids = setTmp;
-            return false;
-        }
+     
+    public static CopyOnWriteArrayList<Aid> get() {
+        return aids;
     }
     
-    public static boolean saveAids() {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(Main.filePlayerAids));
-            synchronized(aids) {
-                Iterator<Aid> it = aids.iterator();
-                
-                while (it.hasNext()) {
-                    Aid aid = it.next();
-                    String owner = aid.getOwnerName();
-                    String name = aid.getName();
-                    int count = aid.getCount();
-                    Location loc = aid.getLocation();
-                    writer.write(owner + ";" + name + ";" + count + ";" + Util.locationToString(loc, ":"));
-                    writer.newLine();
-                }
-            }
-            writer.close();
-            return true;
-        } catch (Exception ex) {
-//XXX : Remove?
-            //Main.suicide(ex);
-            return false;
-        }
+    public static void put(CopyOnWriteArrayList<Aid> aidsNew) {
+        aids = aidsNew;
     }
 }

@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
@@ -33,19 +33,19 @@ public class BarbToughSkin implements Skill {
         if (RaceMgr.getRace(p.getName()).hasData("toughSkin")) { return; }
         
         for (int i = 1; i <= 3; i++) {
-            p.getWorld().playEffect(p.getLocation(), Effect.ZOMBIE_CHEW_IRON_DOOR, 1);
+            p.playEffect(p.getLocation(), Effect.ZOMBIE_CHEW_IRON_DOOR, 1);
         }
         
-        p.sendMessage(Main.prefix + I18n._("skillbartoughskinon", new Object[] {}));
+        p.sendMessage(MMOCraft.prefix + I18n._("skillbartoughskinon", new Object[] {}));
         
-        int tid = Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, new Runnable() {
+        int tid = Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.plugin, new Runnable() {
             public void run() {
                 for (int i = 1; i <= 600; i += 10) {
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, new Runnable() {
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.plugin, new Runnable() {
                         public void run() {
                             if (p.isOnline()) {
                                 Location loc = Bukkit.getPlayer(p.getName()).getLocation();
-                                p.getWorld().playEffect(loc.clone().add(0, 1, 0), Effect.STEP_SOUND, 51);
+                                p.playEffect(loc.add(0, 1, 0), Effect.STEP_SOUND, 51);
                             } else {
                                 return;
                             }
@@ -55,11 +55,11 @@ public class BarbToughSkin implements Skill {
             }
         }, 1L);
         
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, new Runnable() {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.plugin, new Runnable() {
             public void run() {
                 Race race = RaceMgr.getRace(p.getName());
                 if (p.isOnline()) {
-                    p.sendMessage(Main.prefix + I18n._("skillbartoughskinoff", new Object[] {}));
+                    p.sendMessage(MMOCraft.prefix + I18n._("skillbartoughskinoff", new Object[] {}));
                 }
                 race.setData("toughSkin", null);
             }

@@ -17,11 +17,11 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.classes.Archer;
 import com.scizzr.bukkit.mmocraft.classes.Assassin;
-import com.scizzr.bukkit.mmocraft.hooks.Vanish;
-import com.scizzr.bukkit.mmocraft.hooks.Vault;
+import com.scizzr.bukkit.mmocraft.hooks.HookVanish;
+import com.scizzr.bukkit.mmocraft.hooks.HookVault;
 import com.scizzr.bukkit.mmocraft.interfaces.Aid;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
@@ -38,14 +38,14 @@ public class SkillMgr {
             if (AidMgr.isAid(b)) {
                 Aid aid = AidMgr.getAid(b);
 //XXX: Permission to allow breaking other player's helpers
-                if (!(aid.getOwnerName() == p.getName() ||  Vault.hasPermission(p, ""))) {
-                    p.sendMessage(Main.prefix + ChatColor.RED + I18n._("aidnotown", new Object[] {aid.getName()}));
+                if (!(aid.getOwnerName() == p.getName() ||  HookVault.hasPermission(p, ""))) {
+                    p.sendMessage(MMOCraft.prefix + ChatColor.RED + I18n._("aidnotown", new Object[] {aid.getName()}));
                     e.setCancelled(true);
                     return;
                 }
             }
         }
-        race.attackLeft(p, e.getAction());
+        race.attackLeft(p, e);
     }
     
     public static void doAttackRight(Player p, PlayerInteractEvent e) {
@@ -54,7 +54,7 @@ public class SkillMgr {
             if (AidMgr.isAid(b)) {
                 Aid aid = AidMgr.getAid(b);
                 
-                p.sendMessage(Main.prefix + Util.displayAidInfo(p, aid));
+                p.sendMessage(MMOCraft.prefix + Util.displayAidInfo(p, aid));
             }
         }
         Race race = RaceMgr.getRace(p.getName());
@@ -86,7 +86,7 @@ public class SkillMgr {
             if (PetMgr.isPet(lent)) {
                 Pet pet = PetMgr.getPet(lent.getUniqueId());
                 if (pet.getOwnerName().equalsIgnoreCase(p.getName())) {
-                    PetMgr.removePet(pet, true, true);
+                    PetMgr.removePet(pet, true, true, true);
                     lent.remove();
                     return;
                 }
@@ -95,13 +95,13 @@ public class SkillMgr {
             if (lent instanceof Creature) {
                 if (PetMgr.isPet(lent)) {
                     Pet pet = PetMgr.getPet(lent.getUniqueId());
-                    p.sendMessage(Main.prefix + Util.displayPetInfo(p, pet));
+                    p.sendMessage(MMOCraft.prefix + Util.displayPetInfo(p, pet));
                 } else {
-                    p.sendMessage(Main.prefix + Util.displayEntityInfo(p, lent));
+                    p.sendMessage(MMOCraft.prefix + Util.displayEntityInfo(p, lent));
                 }
             } else {
                 if (lent instanceof Player) {
-                    p.sendMessage(Main.prefix + Util.displayPlayerInfo((Player)lent));
+                    p.sendMessage(MMOCraft.prefix + Util.displayPlayerInfo((Player)lent));
                 }
             }
         }
@@ -123,12 +123,12 @@ public class SkillMgr {
                 int tid = Integer.valueOf(race.getData("invis"));
                 Bukkit.getScheduler().cancelTask(tid);
                 race.setData("invis", null);
-                p.sendMessage(Main.prefix + I18n._("skillinvisoff", new Object[] {}));
+                p.sendMessage(MMOCraft.prefix + I18n._("skillinvisoff", new Object[] {}));
                 for (World world : Bukkit.getWorlds()) {
                     for (Entity ent : world.getEntities()) {
                         if (ent instanceof Player) {
                             Player other = (Player)ent;
-                            if (Vanish.canSee(other,  p)) {
+                            if (HookVanish.canSee(other,  p)) {
                                 other.showPlayer(p);
                             }
                         }
@@ -139,7 +139,7 @@ public class SkillMgr {
     }
     
     public static void addCooldown(Player p, String skill, Integer dur) {
-        if (!(p.isOp() == false || Vault.hasPermission(p, "bypass.cooldown"))) {
+        if (!(p.isOp() == false || HookVault.hasPermission(p, "bypass.cooldown"))) {
             cooldowns.put(p.getName() + "=" + skill, dur);
         }
     }
@@ -148,7 +148,7 @@ public class SkillMgr {
         for (String s : cooldowns.keySet()) {
             String[] split = s.split("=");
             if (split[0].equalsIgnoreCase(p.getName()) && split[1].equalsIgnoreCase(skill)) {
-                p.sendMessage(Main.prefix + ChatColor.YELLOW + I18n._("skillcooldown", new Object[] {split[0], split[1]}));
+                p.sendMessage(MMOCraft.prefix + ChatColor.YELLOW + I18n._("skillcooldown", new Object[] {split[0], split[1]}));
                 return true;
             }
         }

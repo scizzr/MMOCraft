@@ -14,39 +14,15 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.managers.AidMgr;
 
 public class Blocks implements Listener {
-    Main plugin;
+    MMOCraft plugin;
     
-    public Blocks(Main instance) {
+    public Blocks(MMOCraft instance) {
         plugin = instance;
     }
-    
-/* Remove Me! I'm just for Testing @ http://forums.bukkit.org/threads/making-a-block-immune-to-explosion.87818/
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onEntityExplode(final EntityExplodeEvent e) {
-        String[] keep = "1,2,3,4,5:0,5:1,5:2,5:3,20".split(",");
-        List<Block> blocks = e.blockList();
-        synchronized (blocks) {
-            Iterator<Block> it = blocks.iterator();
-            while (it.hasNext()) {
-                Block block = it.next();
-                for (int i = 0; i < keep.length; i++) {
-                    String[] info = keep[i].split(":");
-                    int idRem = Integer.valueOf(info[0]);
-                    int valRem = (info.length == 2 ? Integer.valueOf(info[1]) : 0);
-                    
-                    int idBlk = block.getTypeId();
-                    int valBlk = (int)block.getData();
-                    
-                    if (idRem == idBlk && valRem == valBlk) { it.remove(); }
-                }
-            }
-        }
-    }
-*/
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockBreak(final BlockBreakEvent e) {

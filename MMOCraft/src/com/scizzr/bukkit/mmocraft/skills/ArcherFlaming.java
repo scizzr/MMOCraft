@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
@@ -34,14 +35,16 @@ public class ArcherFlaming implements Skill {
         
         Location eye = p.getEyeLocation().clone();
         
-        Vector direction = eye.getDirection().multiply(3.0f);
+        Vector direction = eye.getDirection();
         Arrow arrow = p.getWorld().spawn(eye.add(direction.getX(), direction.getY(), direction.getZ()), Arrow.class);
-        arrow.setVelocity(direction.multiply(f)); arrow.setShooter(p); arrow.setFireTicks(20);
+        arrow.setVelocity(direction.multiply(f*3)); arrow.setShooter(p); arrow.setFireTicks(20);
+        
+        SoundEffects.MOB_CREEPER.playGlobal(p.getLocation(), 1.0f, 0.5f);
         
         ArrowTimer.add(arrow, 50);
         
         if (p.getGameMode() == GameMode.SURVIVAL) {
-            CraftArrow ca = (CraftArrow)arrow; ca.getHandle().fromPlayer = true;
+            CraftArrow ca = (CraftArrow)arrow; ca.getHandle().fromPlayer = 1;
             p.getInventory().removeItem(new ItemStack(Material.ARROW, 1));
         }
     }

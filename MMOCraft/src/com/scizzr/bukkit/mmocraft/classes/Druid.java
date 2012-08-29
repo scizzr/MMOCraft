@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import com.scizzr.bukkit.mmocraft.config.Config;
@@ -20,6 +21,8 @@ import com.scizzr.bukkit.mmocraft.interfaces.Aid;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.managers.AidMgr;
+import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
+import com.scizzr.bukkit.mmocraft.skills.DruidLeafArmor;
 import com.scizzr.bukkit.mmocraft.skills.NoneArrow;
 import com.scizzr.bukkit.mmocraft.util.ComparatorPet;
 import com.scizzr.bukkit.mmocraft.util.Util;
@@ -28,8 +31,6 @@ public class Druid implements Race {
     private String player;
     private int experience;
     int maxAids = 2;
-    private int dmgClass = +2;
-    private int dmgOther = -6;
     private CopyOnWriteArrayList<Aid> aids = new CopyOnWriteArrayList<Aid>();
     private CopyOnWriteArrayList<Pet> pets = new CopyOnWriteArrayList<Pet>();
     private ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
@@ -114,9 +115,11 @@ public class Druid implements Race {
         return data.containsKey(key);
     }
     
-    public void attackLeft(Player p, Action a) {
+    public void attackLeft(Player p, PlayerInteractEvent e) {
+        Action act = e.getAction();
+        
         if (p.getItemInHand().getType() == Material.BOOK) {
-            if (a == Action.LEFT_CLICK_AIR) {
+            if (act == Action.LEFT_CLICK_AIR) {
                 if (p.getLocation().getPitch() <= -60) {
                     
                 } else if (p.getLocation().getPitch() >= 60) {
@@ -129,7 +132,7 @@ public class Druid implements Race {
     }
     
     public void attackRight(Player p, Action a) {
-        if (p.getItemInHand().getType() == Material.BOOK) {
+        if (Util.classWep(RaceMgr.getRace(p.getName()), p.getItemInHand().getTypeId())) {
             if (p.isSneaking()) {
                 if (a == Action.RIGHT_CLICK_BLOCK) {
                     AidMgr.addAid(p, p.getTargetBlock(null, 0).getLocation().getBlock());
@@ -137,7 +140,7 @@ public class Druid implements Race {
                 }
             }
             if (p.getLocation().getPitch() <= -60) {
-                
+                new DruidLeafArmor().execute(p, null, 0);
             } else if (p.getLocation().getPitch() >= 60) {
                 
             } else {
@@ -151,19 +154,11 @@ public class Druid implements Race {
     }
     
     public void attackEntity(Player p, EntityDamageByEntityEvent e) {
+        Race race = RaceMgr.getRace(p.getName());
+        
         int dmg = e.getDamage();
-        boolean classWeapon = false;
-        if (p.getItemInHand().getType() == Material.BOOK) {    classWeapon = true; }
-//TODO: Config - Change damage?
-        //if () {
-            if (classWeapon) {
-                e.setDamage(dmg + (Config.damageAlter ? dmgClass : 0));
-            } else {
-                if (p.getItemInHand().getType() != Material.AIR) {
-                    e.setDamage(dmg + (Config.damageAlter ? dmgOther : 0));
-                }
-            }
-        //}
+        int dmgClass = Config.alterDamage ? Util.calcDamage(race, dmg, Util.classWep(race, p.getItemInHand().getTypeId())) : dmg;
+        e.setDamage(dmgClass);
     }
     
     public void interactEntity(Player p, Entity ent) {

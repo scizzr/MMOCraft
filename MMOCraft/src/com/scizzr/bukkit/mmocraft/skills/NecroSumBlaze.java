@@ -9,7 +9,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
@@ -32,7 +33,7 @@ public class NecroSumBlaze implements Skill {
     public void execute(Player p, Entity ent, float f) {
         Pet pet = new PetBlaze();
         
-        if (PetMgr.numPets(p, pet) >= 1) { p.sendMessage(Main.prefix + I18n._("pethasmax", new Object[] {pet.getName()})); return; }
+        if (PetMgr.numPets(p, pet) >= 1) { p.sendMessage(MMOCraft.prefix + I18n._("pethasmax", new Object[] {pet.getName()})); return; }
         
         if (isCooldown(p)) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
         if (!isLevel(p)) { return; }
@@ -44,9 +45,11 @@ public class NecroSumBlaze implements Skill {
         }
         
         Location loc = p.getTargetBlock(null, 120).getLocation().add(0, 1, 0);
-        Blaze mob = (Blaze)loc.getWorld().spawnCreature(loc, EntityType.BLAZE);
+        Blaze mob = (Blaze)loc.getWorld().spawnEntity(loc, EntityType.BLAZE);
         
         pet.setHealth(mob.getHealth()); pet.setUUID(mob.getUniqueId()); pet.setOwnerName(p.getName());
+        
+        SoundEffects.MOB_BLAZE_BREATHE.playGlobal(p.getLocation());
         
         PetMgr.addPet(p.getName(), pet);
     }

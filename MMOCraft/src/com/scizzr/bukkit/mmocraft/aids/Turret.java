@@ -8,6 +8,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -124,17 +125,20 @@ public class Turret implements Aid {
                     Location locTur = location.clone();
                     Location locEnt = ent.getLocation();
                     
-                    if (locTur.distance(locEnt) <= 5) {
+                    if (locTur.distance(locEnt) <= 25) {
                         if (locTur.getBlockY() != locEnt.getBlockY()) { continue; }
                         
                         Location loc = locEnt.clone();
-                        loc.setPitch(5);
+                        loc.setPitch(0);
                         loc.setYaw(Util.getYawFromLocToLoc(locTur, locEnt));
                         
-                        final Vector direction = loc.getDirection();
+                        final Vector direction = loc.getDirection().multiply(5f);
                         
-                        Arrow arrow = location.getWorld().spawn(locTur.clone().add(0.5, 1.5, 0.5), Arrow.class);
+                        Arrow arrow = location.getWorld().spawn(locTur.clone().add(0.5, 1.0, 0.5), Arrow.class);
+                        
                         arrow.setVelocity(direction); arrow.setShooter(player); //arrow.setFireTicks(60);
+                        
+                        ((CraftArrow)arrow).getHandle().shake = 0;
                         
                         locTur.getWorld().playEffect(locTur, Effect.BOW_FIRE, 1);
                         

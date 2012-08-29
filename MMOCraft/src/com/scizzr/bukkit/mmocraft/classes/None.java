@@ -12,6 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import com.scizzr.bukkit.mmocraft.interfaces.Aid;
@@ -109,7 +110,7 @@ public class None implements Race {
         return data.containsKey(key);
     }
     
-    public void attackLeft(Player p, Action a) {
+    public void attackLeft(Player p, PlayerInteractEvent e) {
         //
     }
     

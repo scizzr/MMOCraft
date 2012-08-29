@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import com.scizzr.bukkit.mmocraft.config.Config;
@@ -20,7 +22,7 @@ import com.scizzr.bukkit.mmocraft.interfaces.Aid;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.managers.AidMgr;
-import com.scizzr.bukkit.mmocraft.managers.EntityMgr;
+import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
 import com.scizzr.bukkit.mmocraft.managers.SkillMgr;
 import com.scizzr.bukkit.mmocraft.skills.AssassinPowerUp;
 import com.scizzr.bukkit.mmocraft.skills.AssassinShadowStep;
@@ -34,8 +36,6 @@ public class Assassin implements Race {
     private String player;
     private int experience;
     int maxAids = 2;
-    private int dmgClass = -2;
-    private int dmgOther = -4;
     private CopyOnWriteArrayList<Aid> aids = new CopyOnWriteArrayList<Aid>();
     private CopyOnWriteArrayList<Pet> pets = new CopyOnWriteArrayList<Pet>();
     private ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
@@ -120,7 +120,7 @@ public class Assassin implements Race {
         return data.containsKey(key);
     }
     
-    public void attackLeft(Player p, Action a) {
+    public void attackLeft(Player p, PlayerInteractEvent e) {
         //Assassins don't attack the air!
     }
     
@@ -157,34 +157,24 @@ public class Assassin implements Race {
     }
     
     public void attackEntity(Player p, EntityDamageByEntityEvent e) {
-        boolean classWeapon = false; int dmg = e.getDamage();
-        if (p.getItemInHand().getType() == Material.WOOD_SWORD) {    classWeapon = true; }
-        if (p.getItemInHand().getType() == Material.GOLD_SWORD) {    classWeapon = true; }
-        if (p.getItemInHand().getType() == Material.STONE_SWORD) {   classWeapon = true; }
-        if (p.getItemInHand().getType() == Material.IRON_SWORD) {    classWeapon = true; }
-        if (p.getItemInHand().getType() == Material.DIAMOND_SWORD) { classWeapon = true; }
+        Bukkit.broadcastMessage("behind?" + Util.isBehind(p, e.getEntity()));
         
-        if (classWeapon) {
-//TODO: Config - Change damage?
-            //if () {
-                dmg += (Config.damageAlter ? dmgClass : 0);
-            //}
-            if (EntityMgr.isBehind(p, e.getEntity()) && hasData("invis") && p.isSneaking()) {
-                new AssassinSneakAttack().execute(p, e.getEntity(), 0);
-                e.setDamage((int)(dmg * 2.0F)); SkillMgr.breakInvis(p);
-            } else if (EntityMgr.isBehind(p, e.getEntity()) && hasData("invis")) {
-                new AssassinStab().execute(p, e.getEntity(), 0);
-                e.setDamage((int)(dmg * 1.5F)); SkillMgr.breakInvis(p);
-            }
-        } else {
-//TODO: Config - Change damage?
-            //if () {
-                if (p.getItemInHand().getType() != Material.AIR) {
-                    e.setDamage(dmg + (Config.damageAlter ? dmgOther : 0));
-                }
-            //}
-            SkillMgr.breakInvis(p);
+        Race race = RaceMgr.getRace(p.getName());
+        
+        int dmg = e.getDamage();
+        int dmgClass = Config.alterDamage ? Util.calcDamage(race, dmg, Util.classWep(race, p.getItemInHand().getTypeId())) : dmg;
+        int dmgBehind = Util.isBehind(p, e.getEntity()) ? dmgClass+1 : dmgClass;
+        int dmgSkill = (int)(hasData("invis") ? (p.isSneaking() ? dmgBehind*2.0 : dmgBehind*1.5) : dmgBehind);
+        
+        if (hasData("invis") && p.isSneaking()) {
+            new AssassinSneakAttack().execute(p, e.getEntity(), 0);
+        } else if (hasData("invis")) {
+            new AssassinStab().execute(p, e.getEntity(), 0);
         }
+        
+        e.setDamage(dmgSkill);
+        
+        SkillMgr.breakInvis(p);
     }
     
     public void interactEntity(Player p, Entity ent) {
@@ -194,7 +184,7 @@ public class Assassin implements Race {
     }
     
     public void toggleSneak(Player p, PlayerToggleSneakEvent e) {
-        
+        //
     }
     
     public Integer getMaxAids() {

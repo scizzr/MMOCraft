@@ -1,5 +1,6 @@
 package com.scizzr.bukkit.mmocraft.threads;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,37 +16,43 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.TNTPrimed;
 
-public class Explosion implements Runnable {
-    Location loc; Boolean real;
-    
-    public Explosion(Location loc, Boolean real) {
-        this.loc = loc;
-        this.real = real;
+import com.scizzr.bukkit.mmocraft.listeners.Entities;
+
+public class Explosion {
+    public static void make(Location loc, float size, Boolean real) {
+        spawnExplosion(loc.clone(), size, real, false);
     }
     
-    public void run() {
-        spawnExplosion(loc, real);
+    public static void make(Location loc, float size, Boolean real, Boolean packet) {
+        spawnExplosion(loc.clone(), size, real, packet);
     }
     
-    public static void spawnExplosion(Location loc, Boolean real) {
+    private static void spawnExplosion(Location loc, float size, Boolean real, Boolean packet) {
         if (real) {
-            realExplosion(loc);
+            realExplosion(loc, size);
         } else {
-            fakeExplosion(loc);
+            if (packet) {
+                fakeExplosionPacket(loc, (int)(Math.floor((double)size)));
+            } else {
+                fakeExplosion(loc, size);
+            }
         }
     }
     
-    public static void realExplosion(Location loc) {
+    private static void fakeExplosion(Location loc, float size) {
         Block b = loc.getBlock();
         TNTPrimed tnt = (TNTPrimed)b.getWorld().spawn(b.getLocation().add(0D, 1D, 0D), TNTPrimed.class);
-        tnt.setFuseTicks(0); tnt.setYield(2F);
+        tnt.setFuseTicks(0); tnt.setYield(size);
+        Entities.safeTNT.add(tnt.getUniqueId());
     }
     
-    public static void fakeExplosion(Location loc) {
-        fakeExplosion(loc, 4);
+    private static void realExplosion(Location loc, float size) {
+        Block b = loc.getBlock();
+        TNTPrimed tnt = (TNTPrimed)b.getWorld().spawn(b.getLocation().add(0D, 1D, 0D), TNTPrimed.class);
+        tnt.setFuseTicks(0); tnt.setYield(size);
     }
     
-    public static void fakeExplosion(Location loc, int radius) {
+    private static void fakeExplosionPacket(Location loc, int radius) {
         if (loc == null) return;
         World world = loc.getWorld();
         Set<Block> blocks = new HashSet<Block>();
@@ -61,23 +68,23 @@ public class Explosion implements Runnable {
                 }
             }
         }
-        fakeExplosion(loc, blocks);
+        fakeExplosionPacket(loc, blocks);
     }
     
-    protected static void fakeExplosion(Location location, Set<Block> blocks) {
+    private static void fakeExplosionPacket(Location location, Set<Block> blocks) {
         if (blocks == null) return;
         if (blocks.size() == 0) return;
         
-        HashSet<ChunkPosition> chunkPositions = new HashSet<ChunkPosition>(blocks.size());
+        ArrayList<ChunkPosition> chunkPositions = new ArrayList<ChunkPosition>(blocks.size());
         
         for (Block block : blocks) {
             chunkPositions.add(new ChunkPosition(block.getX(), block.getY(), block.getZ()));
         }
         
-        Packet60Explosion packet = new Packet60Explosion(location.getX(),location.getY(), location.getZ(), 0.1f, chunkPositions);
+        Packet60Explosion packet = new Packet60Explosion(location.getX(),location.getY(), location.getZ(), 0.1f, chunkPositions, null);
         CraftServer craftServer = (CraftServer) Bukkit.getServer();
-        MinecraftServer minecraftServer = craftServer.getServer();
+        MinecraftServer mcSrv = craftServer.getServer();
         
-        minecraftServer.serverConfigurationManager.sendPacketNearby(location.getX(), location.getY(), location.getZ(), 64, ((CraftWorld)location.getWorld()).getHandle().dimension, packet);
+        mcSrv.getServerConfigurationManager().sendPacketNearby(location.getX(), location.getY(), location.getZ(), 64, ((CraftWorld)location.getWorld()).getHandle().dimension, packet);
     }
 }

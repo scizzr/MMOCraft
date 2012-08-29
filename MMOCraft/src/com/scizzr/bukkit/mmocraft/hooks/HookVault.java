@@ -8,16 +8,16 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.config.Config;
 import com.scizzr.bukkit.mmocraft.util.I18n;
 
-public class Vault {//extends JavaPlugin {
+public class HookVault {
     private static Permission permissionHandler = null;
     private static Economy economyHandler = null;
     
     public static boolean setupPermissions() {
-        if (Main.pm.getPlugin("Vault") != null) {
+        if (MMOCraft.pm.getPlugin("Vault") != null) {
             RegisteredServiceProvider<Permission> permissionProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
             
             if (permissionProvider != null) {
@@ -30,7 +30,7 @@ public class Vault {//extends JavaPlugin {
     }
     
     public static boolean setupEconomy() {
-        if (Main.pm.getPlugin("Vault") != null) {
+        if (MMOCraft.pm.getPlugin("Vault") != null) {
             RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
             
             if (economyProvider != null) {
@@ -61,7 +61,7 @@ public class Vault {//extends JavaPlugin {
                     double balance = economyHandler.getBalance(p.getName());
                     if ( ( (balance - amount) >= 0.0 ) && ( amount > 0.0 ) ) {
                         economyHandler.withdrawPlayer(p.getName(), amount);
-                        p.sendMessage(Main.prefix + I18n._("econpaid", new Object[] {formatPrice(amount, ChatColor.YELLOW)}));
+                        p.sendMessage(MMOCraft.prefix + I18n._("econpaid", new Object[] {formatPrice(amount, ChatColor.YELLOW)}));
                         return true;
                     } else { return false; }
                 } else { return true; }

@@ -29,10 +29,10 @@ public class NoneArrow implements Skill {
         
         Vector direction = eye.getDirection();
         Arrow arrow = p.getWorld().spawn(eye.add(direction.getX(), direction.getY(), direction.getZ()), Arrow.class);
-        arrow.setVelocity(direction.multiply(3.0f)); arrow.setShooter(p);
+        arrow.setVelocity(direction.multiply(f*3)); arrow.setShooter(p);
         
         if (p.getGameMode() == GameMode.SURVIVAL) {
-            CraftArrow ca = (CraftArrow)arrow; ca.getHandle().fromPlayer = true;
+            CraftArrow ca = (CraftArrow)arrow; ca.getHandle().fromPlayer = 1;
             p.getInventory().removeItem(new ItemStack(Material.ARROW, 1));
         }
         

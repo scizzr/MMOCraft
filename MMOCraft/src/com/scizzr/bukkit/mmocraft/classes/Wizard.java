@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import com.scizzr.bukkit.mmocraft.config.Config;
@@ -25,6 +26,7 @@ import com.scizzr.bukkit.mmocraft.skills.NoneArrow;
 import com.scizzr.bukkit.mmocraft.skills.WizardFireball;
 import com.scizzr.bukkit.mmocraft.skills.WizardLightning;
 import com.scizzr.bukkit.mmocraft.skills.WizardMeteor;
+import com.scizzr.bukkit.mmocraft.skills.WizardTeleport;
 import com.scizzr.bukkit.mmocraft.util.ComparatorPet;
 import com.scizzr.bukkit.mmocraft.util.I18n;
 import com.scizzr.bukkit.mmocraft.util.Util;
@@ -33,8 +35,6 @@ public class Wizard implements Race {
     private String player;
     private int experience;
     int maxAids = 2;
-    private int dmgClass = +2;
-    private int dmgOther = -6;
     private CopyOnWriteArrayList<Aid> aids = new CopyOnWriteArrayList<Aid>();
     private CopyOnWriteArrayList<Pet> pets = new CopyOnWriteArrayList<Pet>();
     private ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
@@ -119,18 +119,30 @@ public class Wizard implements Race {
         return data.containsKey(key);
     }
     
-    public void attackLeft(Player p, Action a) {
+    public void attackLeft(Player p, PlayerInteractEvent e) {
+        Action act = e.getAction();
+        
         if (p.getItemInHand().getType() == Material.STICK) {
-            if (a == Action.LEFT_CLICK_AIR) {
-                new WizardFireball().execute(p, null, 0);
+            if (act == Action.LEFT_CLICK_AIR) {
+                if (p.isSneaking()) {
+                    new WizardTeleport().execute(p, null, 0);
+                } else {
+                    new WizardFireball().execute(p, null, 0);
+                }
             }
         }
     }
     
     public void attackRight(Player p, Action a) {
+        Race race = RaceMgr.getRace(p.getName());
+        
+        int dmg = 0;
+        int dmgClass = Config.alterDamage ? Util.calcDamage(race, dmg, Util.classWep(race, p.getItemInHand().getTypeId())) : dmg;
+        dmg = dmgClass;
+        
         if (p.getItemInHand().getType() == Material.STICK) {
-            if (p.isSneaking()) {
-                if (a == Action.RIGHT_CLICK_BLOCK) {
+            if (a == Action.RIGHT_CLICK_BLOCK) {
+                if (p.isSneaking()) {
                     AidMgr.addAid(p, p.getTargetBlock(null, 0).getLocation().getBlock());
                     return;
                 }
@@ -152,27 +164,21 @@ public class Wizard implements Race {
     }
     
     public void attackEntity(Player p, EntityDamageByEntityEvent e) {
+        Race race = RaceMgr.getRace(p.getName());
+        
         int dmg = e.getDamage();
-        boolean classWeapon = false;
-        if (p.getItemInHand().getType() == Material.STICK) {    classWeapon = true; }
-//TODO: Config - Change damage?
-        //if () {
-            if (classWeapon) {
-                e.setDamage(dmg + (Config.damageAlter ? dmgClass : 0));
-            } else {
-                if (p.getItemInHand().getType() != Material.AIR) {
-                    e.setDamage(dmg + (Config.damageAlter ? dmgOther : 0));
-                }
-            }
-        //}
-    }
-    
-    public void interactEntity(Player p, Entity ent) {
-        double diff = Util.setDec(p.getLocation().distance(ent.getLocation()), 2);
+        int dmgClass = Config.alterDamage ? Util.calcDamage(race, dmg, Util.classWep(race, p.getItemInHand().getTypeId())) : dmg;
+        e.setDamage(dmgClass);
+        
+        double diff = Util.setDec(p.getLocation().distance(e.getEntity().getLocation()), 2);
         
         if (diff >= 50) {
             RaceMgr.addExp(p.getName(), (int)diff, ChatColor.YELLOW + I18n._("niceshot", new Object[] {diff}));
         }
+    }
+    
+    public void interactEntity(Player p, Entity ent) {
+        //
     }
     
     public void toggleSneak(Player p, PlayerToggleSneakEvent e) {

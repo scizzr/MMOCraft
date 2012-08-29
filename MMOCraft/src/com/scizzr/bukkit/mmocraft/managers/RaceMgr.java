@@ -1,15 +1,9 @@
 package com.scizzr.bukkit.mmocraft.managers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Blaze;
@@ -40,7 +34,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.classes.Archer;
 import com.scizzr.bukkit.mmocraft.classes.Assassin;
 import com.scizzr.bukkit.mmocraft.classes.Barbarian;
@@ -48,6 +42,8 @@ import com.scizzr.bukkit.mmocraft.classes.Druid;
 import com.scizzr.bukkit.mmocraft.classes.Necromancer;
 import com.scizzr.bukkit.mmocraft.classes.None;
 import com.scizzr.bukkit.mmocraft.classes.Wizard;
+import com.scizzr.bukkit.mmocraft.custommobs.CustomZombie;
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.skills.AssassinStealth;
 import com.scizzr.bukkit.mmocraft.util.I18n;
@@ -56,11 +52,10 @@ import com.scizzr.bukkit.mmocraft.util.Util;
 public class RaceMgr {
     private static int maxLvl = 50, expMult = 1;
     
-    private static ConcurrentHashMap<Race, Boolean> players = new ConcurrentHashMap<Race, Boolean> ();
+    private static CopyOnWriteArrayList<Race> races = new CopyOnWriteArrayList<Race> ();
     
     public static Race getRace(String name) {
-        for (Entry<Race, Boolean> entry : players.entrySet()) {
-            Race race = entry.getKey();
+        for (Race race : races) {
             if (race.getPlayerName().equals(name)) {
                 return race;
             }
@@ -84,10 +79,10 @@ public class RaceMgr {
             //Currently ON
             if (getRace(name) != null) {
                 race.setExp(getExp(name));
-                players.remove(getRace(name));
+                races.remove(getRace(name));
             }
             //END
-            players.put(race, true);
+            races.add(race);
             
             AidMgr.removeAllPlayerAids(name);
             PetMgr.removeAllPlayerPets(name, true);
@@ -123,7 +118,7 @@ public class RaceMgr {
     }
     
     public static void resetRace(String name) {
-        if (getRace(name) != null) { players.remove(getRace(name)); }
+        if (getRace(name) != null) { races.remove(getRace(name)); }
     }
     
     public static int getExp(String name) {
@@ -148,12 +143,12 @@ public class RaceMgr {
                     p.getWorld().strikeLightningEffect(p.getLocation().clone().add(0, 10, 0));
                 }
                 
-                p.getWorld().playEffect(p.getLocation().clone().add(0.5, 2, 0.5), Effect.POTION_BREAK, 1);
+                SoundEffects.RANDOM_LEVELUP.play(p, p.getLocation());
                 p.setHealth(20); p.setFoodLevel(20);
                 
-                p.sendMessage(Main.prefix + ChatColor.AQUA + I18n._("", new Object[] {getLevel(old+xp)}));
+                p.sendMessage(MMOCraft.prefix + ChatColor.AQUA + I18n._("lvlup", new Object[] {getLevel(old+xp)}));
             } else {
-                p.sendMessage(Main.prefix + String.format(why, xp));
+                p.sendMessage(MMOCraft.prefix + String.format(why, xp));
             }
         }
     }
@@ -185,40 +180,52 @@ public class RaceMgr {
     }
     
     public static void slayExp(String name, Entity eDead) {
+        final Player p = Bukkit.getPlayer(name);
+        
         int exp = 0;
     // Passive
-        if (eDead instanceof Chicken) {     exp = expMult*4; }
-        if (eDead instanceof Cow) {         exp = expMult*10; }
-        if (eDead instanceof MushroomCow) { exp = expMult*10; }
-        if (eDead instanceof Ocelot) {      exp = expMult*10; }
-        if (eDead instanceof Pig) {         exp = expMult*10; }
-        if (eDead instanceof Sheep) {       exp = expMult*8; }
-        if (eDead instanceof Squid) {       exp = expMult*10; }
-        if (eDead instanceof Villager) {    exp = expMult*20; }
+        if (eDead instanceof Chicken) {     exp = expMult*  4; }
+        if (eDead instanceof Cow) {         exp = expMult* 10; }
+        if (eDead instanceof MushroomCow) { exp = expMult* 10; }
+        if (eDead instanceof Ocelot) {      exp = expMult* 10; }
+        if (eDead instanceof Pig) {         exp = expMult* 10; }
+        if (eDead instanceof Sheep) {       exp = expMult*  8; }
+        if (eDead instanceof Squid) {       exp = expMult* 10; }
+        if (eDead instanceof Villager) {    exp = expMult* 20; }
     // Neutral
-        if (eDead instanceof Enderman) {    exp = expMult*40; }
-        if (eDead instanceof Wolf) {        exp = expMult*8; }
-        if (eDead instanceof PigZombie) {   exp = expMult*20; }
+        if (eDead instanceof Enderman) {    exp = expMult* 40; }
+        if (eDead instanceof Wolf) {        exp = expMult*  8; }
+        if (eDead instanceof PigZombie) {   exp = expMult* 20; }
     // Hostile
-        if (eDead instanceof Blaze) {       exp = expMult*20; }
-        if (eDead instanceof CaveSpider) {  exp = expMult*12; }
-        if (eDead instanceof Creeper) {     exp = expMult*20; }
-        if (eDead instanceof Ghast) {       exp = expMult*10; }
-        if (eDead instanceof MagmaCube) {   exp = expMult*16; }
-        if (eDead instanceof Silverfish) {  exp = expMult*8; }
-        if (eDead instanceof Skeleton) {    exp = expMult*20; }
-        if (eDead instanceof Slime) {       exp = expMult*16; }
-        if (eDead instanceof Spider) {      exp = expMult*16; }
-//        if (eDead instanceof Jockey) {      exp = mod*36; }
-        if (eDead instanceof Zombie) {      exp = expMult*20; }
+        if (eDead instanceof Blaze) {       exp = expMult* 20; }
+        if (eDead instanceof CaveSpider) {  exp = expMult* 12; }
+        if (eDead instanceof Creeper) {     exp = expMult* 20; }
+        if (eDead instanceof Ghast) {       exp = expMult* 10; }
+        if (eDead instanceof MagmaCube) {   exp = expMult* 16; }
+        if (eDead instanceof Silverfish) {  exp = expMult*  8; }
+        if (eDead instanceof Skeleton) {    exp = expMult* 20; }
+        if (eDead instanceof Slime) {       exp = expMult* 16; }
+        if (eDead instanceof Spider) {      exp = expMult* 16; }
+        if (eDead instanceof Zombie) {      exp = expMult* 20; }
     // Utility
-        if (eDead instanceof Snowman) {     exp = expMult*6; }
+        if (eDead instanceof Snowman) {     exp = expMult*  6; }
         if (eDead instanceof IronGolem) {   exp = expMult*100; }
     // Bosses & Unused
         if (eDead instanceof Giant) {       exp = expMult*100; }
         if (eDead instanceof EnderDragon) { exp = expMult*200; }
     // Player
-        if (eDead instanceof Player) {      exp = expMult*5; }
+        if (eDead instanceof Player) {      exp = expMult*  5; }
+    // Custom Mobs
+        if (eDead instanceof CustomZombie) {exp = (int)(expMult*1.5); Bukkit.broadcastMessage("CustomZombie"); }
+        
+        for (int i = 0; i <= exp; i++) {
+            final int count = i;
+            Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.plugin, new Runnable() {
+                public void run() {
+                    SoundEffects.RANDOM_CLICK.play(p, p.getLocation(), 0.5f, 0.8f);
+                }
+            }, count*2);
+        }
         
         addExp(name, exp, I18n._("expgainedwhy", new Object[] {exp, I18n._("exp", new Object[] {}), eDead.getType().getName()}));
     }
@@ -226,8 +233,7 @@ public class RaceMgr {
     public static void tickStill() {
         int neededSecs = 10;
         
-        for (Entry<Race, Boolean> entry : players.entrySet()) {
-            Race race = entry.getKey();
+        for (Race race : races) {
             if (race instanceof Assassin) {
                 OfflinePlayer ofp = EntityMgr.getOfflinePlayer(race.getPlayerName());
                 if (ofp.isOnline()) {
@@ -263,75 +269,11 @@ public class RaceMgr {
         }
     }
     
-    public static boolean load() {
-        File file = new File(Main.filePlayerClasses.getAbsolutePath());
-        if (!Main.filePlayerClasses.exists()) {
-            try {
-                file.createNewFile();
-                Main.log.info(Main.prefixConsole + I18n._("succeedyml", new Object[] {file.getName()}));
-            } catch (Exception ex) {
-                Main.log.info(Main.prefixConsole + I18n._("failedyml", new Object[] {file.getName()}));
-                Main.suicide(ex);
-            }
-        }
-        ConcurrentHashMap<Race, Boolean> mapTmp = players;
-        try {
-            players.clear();
-            BufferedReader reader = new BufferedReader(new FileReader(Main.filePlayerClasses));
-            String line = reader.readLine();
-            
-            while (line != null) {
-                String[] valueA = line.split(";");
-                    if (valueA.length != 3) { continue; }
-                    String play = valueA[0];
-                    String name = valueA[1];
-                    int exp = Integer.valueOf(valueA[2]);
-                
-                Race race = null;
-                if (name.equalsIgnoreCase("none")) { race = new None(); }
-                if (name.equalsIgnoreCase("archer")) { race = new Archer(); }
-                if (name.equalsIgnoreCase("assassin")) { race = new Assassin(); }
-                if (name.equalsIgnoreCase("barbarian")) { race = new Barbarian(); }
-                if (name.equalsIgnoreCase("druid")) { race = new Druid(); }
-                if (name.equalsIgnoreCase("necromancer")) { race = new Necromancer(); }
-                if (name.equalsIgnoreCase("wizard")) { race = new Wizard(); }
-                
-                if (race != null) {
-                    race.setPlayerName(play); race.setExp(exp);
-                    players.put(race, true);
-                }
-                
-                line = reader.readLine();
-            }
-            
-            return true;
-        } catch (Exception ex) {
-            players = mapTmp;
-//XXX : Remove?
-            //Main.suicide(ex);
-            return false;
-        }
+    public static CopyOnWriteArrayList<Race> get() {
+        return races;
     }
     
-    public static boolean save() {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(Main.filePlayerClasses));
-            for (Entry<Race, Boolean> entry : players.entrySet()) {
-                Race race = entry.getKey();
-                String play = race.getPlayerName();
-                String name = race.getName();
-                int exp = race.getExp();
-                
-                writer.write(play + ";" + name + ";" + exp);
-                writer.newLine();
-            }
-            writer.close();
-            return true;
-        } catch (Exception ex) {
-//XXX : Remove?
-            //Main.suicide(ex);
-            ex.printStackTrace();
-            return false;
-        }
+    public static void put(CopyOnWriteArrayList<Race> racesNew) {
+        races = racesNew;
     }
 }

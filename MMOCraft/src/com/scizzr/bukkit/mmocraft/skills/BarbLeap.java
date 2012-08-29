@@ -10,7 +10,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.EntityMgr;
@@ -35,7 +35,7 @@ public class BarbLeap implements Skill {
             Location loc = p.getLocation().clone(); loc.setPitch(-90);
             p.setVelocity(loc.getDirection());
             
-            Bukkit.getScheduler().scheduleSyncDelayedTask(Main.pm.getPlugin(Main.info.getName()), new Runnable() {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.pm.getPlugin(MMOCraft.info.getName()), new Runnable() {
                 public void run() {
                     for (final Entity ent : p.getNearbyEntities(3, 3, 3)) {
                         if (ent instanceof LivingEntity) {
@@ -43,7 +43,7 @@ public class BarbLeap implements Skill {
                             
                             Location loc = ent.getLocation().clone(); loc.setPitch(-90);
                             ((LivingEntity)ent).setVelocity(loc.getDirection());
-                            Bukkit.getScheduler().scheduleSyncDelayedTask(Main.pm.getPlugin(Main.info.getName()), new Runnable() {
+                            Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.pm.getPlugin(MMOCraft.info.getName()), new Runnable() {
                                 public void run() {
                                     ((LivingEntity)ent).damage((int)f, p);
                                     EntityMgr.setAttacker(ent, p);

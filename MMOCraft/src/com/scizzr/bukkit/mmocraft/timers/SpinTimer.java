@@ -3,6 +3,9 @@ package com.scizzr.bukkit.mmocraft.timers;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import com.scizzr.bukkit.mmocraft.interfaces.Race;
+import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
+
 public class SpinTimer implements Runnable {
     String act; Object p1; Object p2;
     
@@ -21,6 +24,9 @@ public class SpinTimer implements Runnable {
     }
     
     public static void spinThread(Player p) {
+        Race race = RaceMgr.getRace(p.getName());
+        race.setData("spinning", true);
+        
         Location begin = p.getLocation();
         float yaw = p.getLocation().getYaw();
         for (int i = 1; i <= 10; i += 1) {
@@ -35,5 +41,6 @@ public class SpinTimer implements Runnable {
             }
         }
         p.teleport(begin);
+        race.setData("spinning", null);
     }
 }

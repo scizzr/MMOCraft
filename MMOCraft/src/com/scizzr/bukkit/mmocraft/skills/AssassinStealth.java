@@ -6,8 +6,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.mmocraft.Main;
-import com.scizzr.bukkit.mmocraft.hooks.Vanish;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
+import com.scizzr.bukkit.mmocraft.config.Config;
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
+import com.scizzr.bukkit.mmocraft.hooks.HookVanish;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.EntityMgr;
@@ -16,8 +18,8 @@ import com.scizzr.bukkit.mmocraft.managers.SkillMgr;
 import com.scizzr.bukkit.mmocraft.util.I18n;
 
 public class AssassinStealth implements Skill {
-    int cooldown = 600;
-    int lvlReq   =  10;
+    int cooldown = Config.assSklStealtCd;
+    int lvlReq   = Config.assSklStealtLvl;
     int lasts    = 200;
     
     Random rand = new Random();
@@ -32,40 +34,46 @@ public class AssassinStealth implements Skill {
         
         if (RaceMgr.getRace(p.getName()).hasData("invis")) { return; }
         
-        for (Entity ent : p.getNearbyEntities(10, 10, 10)) {
-            if (ent instanceof Player) {
-                Player other = (Player)ent;
-                other.hidePlayer(p);
-            }
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            other.hidePlayer(p);
         }
-        for (final Player other : Bukkit.getOnlinePlayers()) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, new Runnable() {
-                public void run() {
+        
+        Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.plugin, new Runnable() {
+            public void run() {
+                RaceMgr.getRace(p.getName()).setData("invis", null);
+                
+                for (final Player other : Bukkit.getOnlinePlayers()) {
                     Player hide = EntityMgr.getOnlinePlayer(other.getName());
                     Player look = EntityMgr.getOnlinePlayer(p.getName());
                     if (hide != null && look != null) {
-                        if (Vanish.canSee(other, p)) {
-                            other.showPlayer(p);
+                        if (look.equals(hide)) { continue; }
+                        if (look.getWorld() == hide.getWorld()) {
+                            if (HookVanish.canSee(other, p)) {
+                                other.showPlayer(p);
+                            }
                         }
                     }
                 }
-            }, lasts);
-        }
+            }
+        }, lasts);
+        
 //XXX: Config - Notify when they go invisible and visible
-        //if () {
-            p.sendMessage(Main.prefix + I18n._("skillinvison", new Object[] {}));
+        //if () { //invis
+            p.sendMessage(MMOCraft.prefix + I18n._("skillinvison", new Object[] {}));
+            SoundEffects.PORTAL_TRAVEL.play(p, p.getLocation(), 0.3f, 2.0f);
         //}
-        //if () {
-            int tid = Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, new Runnable() {
+        //if () { //vis
+            int tid = Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.plugin, new Runnable() {
                 public void run() {
-                    Player play = EntityMgr.getOnlinePlayer(p.getName());
-                    if (play != null) {
-                        play.sendMessage(Main.prefix + I18n._("skillinvisoff", new Object[] {}));
-                        RaceMgr.getRace(p.getName()).setData("invis", null);
+                    if (p != null) {
+                        p.sendMessage(MMOCraft.prefix + I18n._("skillinvisoff", new Object[] {}));
+                        SoundEffects.PORTAL_TRIGGER.play(p, p.getLocation(), 25f, 2.5f);
                     }
                 }
             }, lasts);
+            
             RaceMgr.getRace(p.getName()).setData("invis", tid);
+            
         //}
 //XXX
     }

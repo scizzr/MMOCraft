@@ -2,9 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/Vault_1.2.16.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/craft_1.2.5-R4.jar" sourcepath="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/bukkit_1.2.5-R4.zip"/>
-	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/NoCheatPlus.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/VanishNoPacket_3.10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/Vault_1.2.17.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/NoCheatPlus_3.6.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/VanishNoPacket_3.12.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/WorldGuard_5.5.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/craft_1.3.1-R2.jar" sourcepath="C:/Users/Chris/Dropbox/Documents/Programming/Java/workspace/bukkit_1.3.1-R2.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

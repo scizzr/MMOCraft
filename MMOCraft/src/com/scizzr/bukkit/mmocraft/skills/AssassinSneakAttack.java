@@ -9,15 +9,16 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
+import com.scizzr.bukkit.mmocraft.config.Config;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
 import com.scizzr.bukkit.mmocraft.managers.SkillMgr;
 
 public class AssassinSneakAttack implements Skill {
-    int cooldown = 100;
-    int lvlReq   =  50;
+    int cooldown = Config.assSklSneAttCd;
+    int lvlReq   = Config.assSklSneAttLvl;
     
     Random rand = new Random();
     
@@ -36,7 +37,7 @@ public class AssassinSneakAttack implements Skill {
         ent.setVelocity(direction.multiply(2.0F));
         
         for (int i = 1; i <= 5; i ++) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, new Runnable() {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.plugin, new Runnable() {
                 public void run() {
                     loc.getWorld().playEffect(loc, Effect.ZOMBIE_CHEW_WOODEN_DOOR, 1);
                 }

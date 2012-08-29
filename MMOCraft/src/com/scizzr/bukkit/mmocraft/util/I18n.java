@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 
 public class I18n {
     private static I18n instance;
@@ -14,13 +14,15 @@ public class I18n {
     private Locale locale;
     private Map<String, MessageFormat> messageFormatCache = new HashMap<String, MessageFormat>();
     
-    public I18n(Main plugin) {
+    public I18n(MMOCraft plugin) {
         locale = Locale.ENGLISH;
-        //bundle = ResourceBundle.getBundle("com.scizzr.bukkit.mmocraft.util.messages", locale);
+//XXX : Enable
+//        bundle = ResourceBundle.getBundle("com.scizzr.bukkit." + MMOCraft.info.getName().toLowerCase() + ".util.messages", locale);
     }
     
     public static String _(String string, Object[] objects) {
         if (instance == null) { return ""; }
+        //XXX : Remove
         return string;
 /*
         try {
@@ -30,6 +32,7 @@ public class I18n {
     
             return instance.format(string, objects);
         } catch (Exception ex) {
+            ex.printStackTrace();
             return string;
         }
 */

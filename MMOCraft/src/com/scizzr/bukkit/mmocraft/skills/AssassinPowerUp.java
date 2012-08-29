@@ -10,7 +10,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
+import com.scizzr.bukkit.mmocraft.config.Config;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.EntityMgr;
@@ -18,8 +19,8 @@ import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
 import com.scizzr.bukkit.mmocraft.managers.SkillMgr;
 
 public class AssassinPowerUp implements Skill {
-    int cooldown = 600;
-    int lvlReq   =   0;
+    int cooldown = Config.assSklPoweUpCd;
+    int lvlReq   = Config.assSklPoweUpLvl;
     
     Random rand = new Random();
     
@@ -46,11 +47,11 @@ public class AssassinPowerUp implements Skill {
             }
             if (num > 0) {
                 final int total = (int)num;
-                Bukkit.getScheduler().scheduleAsyncDelayedTask(Main.pm.getPlugin(Main.info.getName()), new Runnable() {
+                Bukkit.getScheduler().scheduleAsyncDelayedTask(MMOCraft.pm.getPlugin(MMOCraft.info.getName()), new Runnable() {
                     public void run () {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, total*10, (total/10) <= 3 ? (total/10) : 3));
                         p.getWorld().playEffect(p.getLocation(), Effect.POTION_BREAK, 1);
-                        p.sendMessage(Main.prefix + "Leeched " + total + " enemies");
+                        p.sendMessage(MMOCraft.prefix + "Leeched " + total + " enemies");
                     }
                 }, 40L);
             }

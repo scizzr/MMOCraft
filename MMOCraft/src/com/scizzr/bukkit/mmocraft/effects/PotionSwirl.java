@@ -9,7 +9,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 
 public class PotionSwirl {
     public static void playPotionEffect(final Player player, final LivingEntity entity, int color, int duration) {
@@ -20,7 +20,7 @@ public class PotionSwirl {
         Packet40EntityMetadata packet = new Packet40EntityMetadata(entity.getEntityId(), dw);
         ((CraftPlayer)player).getHandle().netServerHandler.sendPacket(packet);
          
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, new Runnable() {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(MMOCraft.plugin, new Runnable() {
             public void run() {
                 DataWatcher dwReal = ((CraftLivingEntity)entity).getHandle().getDataWatcher();
                 dw.watch(8, dwReal.getInt(8));

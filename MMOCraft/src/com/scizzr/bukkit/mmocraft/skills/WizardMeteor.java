@@ -5,10 +5,12 @@ import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
@@ -17,7 +19,7 @@ import com.scizzr.bukkit.mmocraft.timers.FireballTimer;
 import com.scizzr.bukkit.mmocraft.util.Util;
 
 public class WizardMeteor implements Skill {
-    int cooldown =  40;
+    int cooldown =   0;
     int lvlReq   =   0;
     
     Random rand = new Random();
@@ -49,10 +51,12 @@ public class WizardMeteor implements Skill {
         loc.setPitch((float) Util.angleToPitch((int) A));
         
         Vector direction = loc.getDirection().multiply(1);
-        Fireball fireball = p.getWorld().spawn(loc.add(direction.getX(), direction.getY(), direction.getZ()), Fireball.class);
-        fireball.setShooter(p); fireball.setYield(0);
+        Fireball fb = (Fireball)p.getWorld().spawnEntity(loc.add(direction.getX(), direction.getY(), direction.getZ()), EntityType.FIREBALL);
+        fb.setShooter(p); fb.setYield(0);
         
-        FireballTimer.addFireball(fireball, 60);
+        SoundEffects.MOB_GHAST_FIREBALL.playGlobal(p.getLocation(), 0.5f, 1.0f);
+        
+        FireballTimer.addFireball(fb, 60);
     }
     
     public boolean isCooldown(Player p) {

@@ -1,13 +1,20 @@
 package com.scizzr.bukkit.mmocraft.listeners;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -15,6 +22,7 @@ import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.SmallFireball;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,6 +33,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
@@ -32,11 +41,13 @@ import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.classes.Assassin;
 import com.scizzr.bukkit.mmocraft.classes.Barbarian;
 import com.scizzr.bukkit.mmocraft.classes.Wizard;
+import com.scizzr.bukkit.mmocraft.custommobs.CustomZombie;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.managers.AidMgr;
@@ -50,20 +61,41 @@ import com.scizzr.bukkit.mmocraft.timers.FireballTimer;
 import com.scizzr.bukkit.mmocraft.util.I18n;
 
 public class Entities implements Listener {
-    Main plugin;
+    MMOCraft plugin;
+    public static ArrayList<UUID> safeTNT = new ArrayList<UUID>();
     
-    public Entities(Main instance) {
+    public Entities(MMOCraft instance) {
         plugin = instance;
     }
     
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onCreatureSpawn(final CreatureSpawnEvent e) {
         Entity ent = e.getEntity();
+        Location loc = ent.getLocation();
+        
         if (e.getSpawnReason() == SpawnReason.SPAWNER) {
             EntityMgr.addSpawnerMob(ent.getUniqueId());
         }
+        
+        World world = ent.getWorld();
+        CraftWorld cWorld = (CraftWorld)world;
+        net.minecraft.server.World mcWorld = cWorld.getHandle();
+        
+        CraftEntity cEnt = (CraftEntity)ent;
+        net.minecraft.server.Entity mcEnt = cEnt.getHandle();
+        
+        
+        if (e.getEntityType() == EntityType.ZOMBIE && !(mcEnt instanceof CustomZombie)) {
+            CustomZombie cz = new CustomZombie(mcWorld, plugin);
+            cz.setPosition(loc.getX(), loc.getY(), loc.getZ());
+            
+            mcWorld.removeEntity(mcEnt);
+            mcWorld.addEntity(cz, SpawnReason.CUSTOM);
+            e.setCancelled(true);
+        }
     }
     
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityCombust(EntityCombustEvent e) {
         Entity ent = e.getEntity();
         if (PetMgr.isPet(ent)) {
@@ -74,15 +106,13 @@ public class Entities implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDamage(final EntityDamageEvent e) {
         Entity ent = e.getEntity();
-    
+        
         if (ent instanceof LivingEntity) {
             LivingEntity lent = (LivingEntity)ent;
             
             if (lent instanceof Player) {
                 Player p = (Player)lent;
                 Race race = RaceMgr.getRace(p.getName());
-                
-                Bukkit.broadcastMessage(e.getDamage() + "");
                 
                 if (e.getCause() == DamageCause.FALL) {
                     if (race != null) {
@@ -103,10 +133,11 @@ public class Entities implements Listener {
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onEntityDamageByEntity(final EntityDamageByEntityEvent e) {
+    public static void onEntityDamageByEntity(final EntityDamageByEntityEvent e) {
         Entity eAtt = e.getDamager();
         Entity eDef = e.getEntity();
         Player pAtt = null;
+        Player pDef = null;
         
         if (eAtt instanceof SmallFireball) {
             LivingEntity shoot = ((SmallFireball)eAtt).getShooter();
@@ -116,7 +147,7 @@ public class Entities implements Listener {
                 Monster mob = (Monster)shoot;
                 if (PetMgr.isPet(mob)) {
                     if (eDef instanceof Player) {
-// Pet shooting its owner
+// Pet Blaze shooting its owner
                         Pet pet = PetMgr.getPet(mob.getUniqueId());
                         String owner = pet.getOwnerName();
                         if (owner.equalsIgnoreCase(((Player)eDef).getName())) {
@@ -124,14 +155,13 @@ public class Entities implements Listener {
                         }
                     } else if (eDef instanceof Monster) {
                         if (PetMgr.isPet(eDef)) {
-
                             Pet petA = PetMgr.getPet(mob.getUniqueId());
                             String ownerA = petA.getOwnerName();
                             Pet petB = PetMgr.getPet(mob.getUniqueId());
                             String ownerB = petB.getOwnerName();
                             
                             if (ownerA.equalsIgnoreCase(ownerB)) {
-//Pet shooting another pet; same owner for both
+//Pet Blaze shooting another pet; same owner for both
                                 e.setCancelled(true);
                             }
                         }
@@ -151,6 +181,14 @@ public class Entities implements Listener {
             }
         } else if (eAtt instanceof Player) {
             pAtt = (Player)eAtt;
+        }
+        
+        if (eDef instanceof Player) {
+            pDef = (Player)eDef;
+            if (eAtt instanceof CustomZombie) {
+                e.setDamage((int)(e.getDamage()*1.5));
+                pDef.setVelocity(new Vector(0, 1, 0));
+            }
         }
         
         if (PetMgr.isPet(eDef) && eAtt instanceof Player) {
@@ -177,6 +215,21 @@ public class Entities implements Listener {
             for (Pet pet : pets) {
                 Monster mob = (Monster)EntityMgr.getEntityByUUID(pet.getUUID());
                 mob.setTarget((LivingEntity)eDef);
+            }
+        }
+        
+        if (pDef != null) {
+            Race race = RaceMgr.getRace(pDef.getName());
+            
+            List<Pet> pets = race.getPets();
+            
+            for (Pet pet : pets) {
+                Monster mob = (Monster)EntityMgr.getEntityByUUID(pet.getUUID());
+                if (eAtt instanceof Projectile) {
+                    mob.setTarget(((Projectile)eAtt).getShooter());
+                } else {
+                    mob.setTarget((LivingEntity)eAtt);
+                }
             }
         }
     }
@@ -206,20 +259,20 @@ public class Entities implements Listener {
                     Entity eAtt = edbee.getDamager();
                     if (eAtt instanceof Player) {
                         Race race = RaceMgr.getRace(((Player)eAtt).getName());
-                        owner.sendMessage(Main.prefix + I18n._("petkillbyplay", new Object[] {pet.getName(), race.getColor() + ((Player)eAtt).getName()}));
+                        owner.sendMessage(MMOCraft.prefix + I18n._("petkillbyplay", new Object[] {pet.getName(), race.getColor() + ((Player)eAtt).getName()}));
                     } else {
-                        owner.sendMessage(Main.prefix + I18n._("petkillbymob", new Object[] {pet.getName(), eAtt.getType().getName()}));
+                        owner.sendMessage(MMOCraft.prefix + I18n._("petkillbymob", new Object[] {pet.getName(), eAtt.getType().getName()}));
                     }
                 } else if (ede.getCause() == DamageCause.BLOCK_EXPLOSION || ede.getCause() == DamageCause.ENTITY_EXPLOSION) {
-                    owner.sendMessage(Main.prefix + I18n._("petexploded", new Object[] {pet.getName()}));
+                    owner.sendMessage(MMOCraft.prefix + I18n._("petexploded", new Object[] {pet.getName()}));
                 } else if (ede.getCause() == DamageCause.FALL) {
-                    owner.sendMessage(Main.prefix + I18n._("petfell", new Object[] {pet.getName()}));
+                    owner.sendMessage(MMOCraft.prefix + I18n._("petfell", new Object[] {pet.getName()}));
                 } else if (ede.getCause() == DamageCause.FIRE || ede.getCause() == DamageCause.FIRE_TICK || ede.getCause() == DamageCause.LAVA) {
-                    owner.sendMessage(Main.prefix + I18n._("petburned", new Object[] {pet.getName()}));
+                    owner.sendMessage(MMOCraft.prefix + I18n._("petburned", new Object[] {pet.getName()}));
                 } else if (ede.getCause() == DamageCause.LIGHTNING) {
-                    owner.sendMessage(Main.prefix + I18n._("petstruck", new Object[] {pet.getName()}));
+                    owner.sendMessage(MMOCraft.prefix + I18n._("petstruck", new Object[] {pet.getName()}));
                 } else if (ede.getCause() == DamageCause.POISON) {
-                    owner.sendMessage(Main.prefix + I18n._("petpoisoned", new Object[] {pet.getName()}));
+                    owner.sendMessage(MMOCraft.prefix + I18n._("petpoisoned", new Object[] {pet.getName()}));
                 } else if (ede.getCause() == DamageCause.PROJECTILE) {
                     Entity eAtt = ((EntityDamageByEntityEvent) ede).getDamager();
                     if (eAtt instanceof Projectile) {
@@ -228,32 +281,53 @@ public class Entities implements Listener {
                         if (proj instanceof Fireball || proj instanceof SmallFireball) {
                             if (shoot instanceof Player) {
                                 Race race = RaceMgr.getRace(((Player)eAtt).getName());
-                                owner.sendMessage(Main.prefix + I18n._("petfirebyplay", new Object[] {pet.getName(), race.getColor() + ((Player)shoot).getName()}));
+                                owner.sendMessage(MMOCraft.prefix + I18n._("petfirebyplay", new Object[] {pet.getName(), race.getColor() + ((Player)shoot).getName()}));
                             } else {
-                                owner.sendMessage(Main.prefix + I18n._("petfirebymob", new Object[] {pet.getName(), shoot.getType().getName()}));
+                                owner.sendMessage(MMOCraft.prefix + I18n._("petfirebymob", new Object[] {pet.getName(), shoot.getType().getName()}));
                             }
                         } else if (proj instanceof Arrow) {
                             if (shoot instanceof Player) {
                                 Race race = RaceMgr.getRace(((Player)shoot).getName());
-                                owner.sendMessage(Main.prefix + I18n._("petshotbyplay", new Object[] {pet.getName(), race.getColor() + ((Player)shoot).getName()}));
+                                owner.sendMessage(MMOCraft.prefix + I18n._("petshotbyplay", new Object[] {pet.getName(), race.getColor() + ((Player)shoot).getName()}));
                             } else {
-                                owner.sendMessage(Main.prefix + I18n._("petshotbymob", new Object[] {pet.getName(), shoot.getType().getName()}));
+                                owner.sendMessage(MMOCraft.prefix + I18n._("petshotbymob", new Object[] {pet.getName(), shoot.getType().getName()}));
                             }
                         } else {
-                            owner.sendMessage(Main.prefix + I18n._("petshot", new Object[] {pet.getName(), shoot.getType().getName()}));
+                            owner.sendMessage(MMOCraft.prefix + I18n._("petshot", new Object[] {pet.getName(), shoot.getType().getName()}));
                         }
                     }
                 } else if (ede.getCause() == DamageCause.SUFFOCATION) {
-                    owner.sendMessage(Main.prefix + I18n._("petsuff", new Object[] {pet.getName()}));
+                    owner.sendMessage(MMOCraft.prefix + I18n._("petsuff", new Object[] {pet.getName()}));
                 } else {
-                    owner.sendMessage(Main.prefix + I18n._("petdied", new Object[] {pet.getName()}));
+                    owner.sendMessage(MMOCraft.prefix + I18n._("petdied", new Object[] {pet.getName()}));
                 }
             }
             
-            PetMgr.removePet(pet, false, false);
+            PetMgr.removePet(pet, true, false, false);
         }
         
         EntityMgr.removeSpawnerMob(ent.getUniqueId());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityExplode(EntityExplodeEvent e) {
+        Entity ent = e.getEntity();
+        
+        if (ent instanceof TNTPrimed) {
+            TNTPrimed tnt = (TNTPrimed)ent;
+            if (safeTNT.contains(tnt.getUniqueId())) {
+                safeTNT.remove(tnt.getUniqueId());
+                
+                List<Block> blocks = e.blockList();
+                synchronized(blocks) {
+                    Iterator<Block> it = blocks.iterator();
+                    while (it.hasNext()) {
+                        Block block = it.next(); block.getData();
+                        it.remove();
+                    }
+                }
+            }
+        }
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
@@ -321,7 +395,7 @@ public class Entities implements Listener {
                     if (RaceMgr.getRace(p.getName()) instanceof Wizard) {
                         Location loc = fireball.getLocation();
                         
-                        new Thread(new Explosion(loc, false)).start();
+                        Explosion.make(loc, 1.5F, false);
                         
                         e.setCancelled(true);
                     }

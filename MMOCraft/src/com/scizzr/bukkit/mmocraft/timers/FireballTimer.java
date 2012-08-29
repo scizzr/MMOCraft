@@ -5,6 +5,8 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Snowball;
 import org.bukkit.util.Vector;
@@ -29,24 +31,18 @@ public class FireballTimer implements Runnable {
     
     public static void countdown() {
         for (Entry<Fireball, Integer> entry : balls.entrySet()) {
-            try {
-                addFireball(entry.getKey(), entry.getValue() - 1);
-            } catch (Exception ex) {
-                /* ex.printStackTrace(); */
-            }
+            addFireball(entry.getKey(), entry.getValue() - 1);
         }
         for (Entry<Snowball, Integer> entry : sparks.entrySet()) {
-            try {
-                addSnowball(entry.getKey(), entry.getValue() - 1);
-            } catch (Exception ex) {
-                /* ex.printStackTrace(); */
-            }
+            addSnowball(entry.getKey(), entry.getValue() - 1);
         }
     }
     
     public static void addFireball(Fireball fire, Integer time) {
         if (time > 0) {
-            balls.put(fire, time);
+            synchronized(balls) {
+                balls.put(fire, time);
+            }
         } else {
             explodeFireball(fire);
         }
@@ -54,7 +50,9 @@ public class FireballTimer implements Runnable {
     
     public static void addSnowball(Snowball ball, Integer time) {
         if (time > 0) {
-            sparks.put(ball, time);
+            synchronized(sparks) {
+                sparks.put(ball, time);
+            }
         } else {
             removeSnowball(ball);
         }
@@ -62,26 +60,34 @@ public class FireballTimer implements Runnable {
 
     public static void addSnowball2(Fireball ball, Integer time) {
         if (time > 0) {
-            balls.put(ball, time);
+            synchronized(balls) {
+                balls.put(ball, time);
+            }
         } else {
             removeFireball(ball);
         }
     }
 
     public static void removeFireball(Fireball fire) {
-        balls.remove(fire);
+        synchronized(balls) {
+            balls.remove(fire);
+        }
         fire.remove();
     }
     
     public static void removeSnowball(Snowball snow) {
-        sparks.remove(snow);
+        synchronized(sparks) {
+            sparks.remove(snow);
+        }
         snow.remove();
     }
     
     public static void explodeFireball(Fireball fire) {
         Random rand = new Random();
         
-        new Thread(new Explosion(fire.getLocation(), false)).start();
+        Explosion.make(fire.getLocation(), 1.5F, false);
+        
+        World world = fire.getWorld();
         
         for (int i = 0; i <= 360; i += 5) {
             Location loc = fire.getLocation().clone();
@@ -89,13 +95,15 @@ public class FireballTimer implements Runnable {
             
             Vector direction = loc.getDirection();
             
-            Snowball snow = fire.getWorld().spawn(loc, Snowball.class);
+            Snowball snow = (Snowball) world.spawnEntity(loc, EntityType.SNOWBALL);
             snow.setVelocity(direction); snow.setFireTicks(60);
             
             addSnowball(snow, (rand.nextInt(2)+1)*10);
         }
         
-        balls.remove(fire);
+        synchronized(balls) {
+            balls.remove(fire);
+        }
         fire.remove();
     }
 }

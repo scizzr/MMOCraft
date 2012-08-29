@@ -18,7 +18,7 @@ import com.scizzr.bukkit.mmocraft.managers.SkillMgr;
 import com.scizzr.bukkit.mmocraft.timers.ArrowTimer;
 
 public class ArcherRing implements Skill {
-    int cooldown =  40;
+    int cooldown = 100;
     int lvlReq   =  20;
     int itemCost =  10;
     

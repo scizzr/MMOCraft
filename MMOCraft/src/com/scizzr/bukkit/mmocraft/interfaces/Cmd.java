@@ -4,11 +4,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 
 public abstract interface Cmd {
     String lineSml = "--------------";
-    String head = lineSml + " " + Main.info.getName() + " " + lineSml;
+    String head = lineSml + " " + MMOCraft.info.getName() + " " + lineSml;
     String foot = lineSml + lineSml + lineSml;
     
     public abstract String getName();

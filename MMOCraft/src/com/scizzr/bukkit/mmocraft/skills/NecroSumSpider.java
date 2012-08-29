@@ -9,7 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Spider;
 import org.bukkit.inventory.ItemStack;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
@@ -32,7 +33,7 @@ public class NecroSumSpider implements Skill {
     public void execute(Player p, Entity ent, float f) {
         Pet pet = new PetSpider();
         
-        if (PetMgr.numPets(p, pet) >= 2) { p.sendMessage(Main.prefix + I18n._("pethasmax", new Object[] {pet.getName()})); return; }
+        if (PetMgr.numPets(p, pet) >= 2) { p.sendMessage(MMOCraft.prefix + I18n._("pethasmax", new Object[] {pet.getName()})); return; }
         
         if (isCooldown(p)) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
         if (!isLevel(p)) { return; }
@@ -44,9 +45,11 @@ public class NecroSumSpider implements Skill {
         }
         
         Location loc = p.getTargetBlock(null, 120).getLocation().add(0, 1, 0);
-        Spider mob = (Spider)loc.getWorld().spawnCreature(loc, EntityType.SPIDER);
+        Spider mob = (Spider)loc.getWorld().spawnEntity(loc, EntityType.SPIDER);
         
         pet.setHealth(mob.getHealth()); pet.setUUID(mob.getUniqueId()); pet.setOwnerName(p.getName());
+        
+        SoundEffects.MOB_SPIDER.playGlobal(p.getLocation());
         
         PetMgr.addPet(p.getName(), pet);
     }

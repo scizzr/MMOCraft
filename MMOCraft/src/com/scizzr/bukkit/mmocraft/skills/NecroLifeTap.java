@@ -4,7 +4,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
+import com.scizzr.bukkit.mmocraft.effects2.SoundEffects;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.EntityMgr;
@@ -42,7 +43,9 @@ public class NecroLifeTap implements Skill {
         
         p.setHealth(p.getHealth() + leech);
         
-        p.sendMessage(Main.prefix + I18n._("skillnectap", new Object[] {leech, (float)leech/2 + " " + I18n._("heart", new Object[] {}) + (leech > 2 || leech == 0 ? "s" : "")}));
+        SoundEffects.RANDOM_BREATH.playGlobal(p.getLocation(), 1.0f, 0.5f);
+        
+        p.sendMessage(MMOCraft.prefix + I18n._("skillnectap", new Object[] {leech, (float)leech/2 + " " + I18n._("heart", new Object[] {}) + (leech > 2 || leech == 0 ? "s" : "")}));
     }
     
     public boolean isCooldown(Player p) {

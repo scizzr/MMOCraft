@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import com.scizzr.bukkit.mmocraft.config.Config;
@@ -20,6 +21,7 @@ import com.scizzr.bukkit.mmocraft.interfaces.Aid;
 import com.scizzr.bukkit.mmocraft.interfaces.Pet;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.managers.AidMgr;
+import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
 import com.scizzr.bukkit.mmocraft.skills.NecroLifeTap;
 import com.scizzr.bukkit.mmocraft.skills.NecroSumBlaze;
 import com.scizzr.bukkit.mmocraft.skills.NecroSumPigzombie;
@@ -32,8 +34,6 @@ public class Necromancer implements Race {
     private String player;
     private int experience;
     int maxAids = 2;
-    private int dmgClass = +2;
-    private int dmgOther = -5;
     private CopyOnWriteArrayList<Aid> aids = new CopyOnWriteArrayList<Aid>();
     private CopyOnWriteArrayList<Pet> pets = new CopyOnWriteArrayList<Pet>();
     private ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
@@ -118,15 +118,23 @@ public class Necromancer implements Race {
         return data.containsKey(key);
     }
     
-    public void attackLeft(Player p, Action a) {
+    public void attackLeft(Player p, PlayerInteractEvent e) {
+        Action act = e.getAction();
+        
         if (p.getItemInHand().getType() == Material.BONE) {
-            if (a == Action.LEFT_CLICK_AIR) {
+            if (act == Action.LEFT_CLICK_AIR) {
                 
             }
         }
     }
     
     public void attackRight(Player p, Action a) {
+        Race race = RaceMgr.getRace(p.getName());
+        
+        int dmg = 0;
+        int dmgClass = Config.alterDamage ? Util.calcDamage(race, dmg, Util.classWep(race, p.getItemInHand().getTypeId())) : dmg;
+        dmg = dmgClass;
+        
         if (p.isSneaking()) {
              if (       p.getItemInHand().getType() == Material.IRON_INGOT) { new NecroSumPigzombie().execute(p, null, 0);
              } else if (p.getItemInHand().getType() == Material.GOLD_INGOT) { new NecroSumSpider().execute(p, null, 0);
@@ -139,7 +147,7 @@ public class Necromancer implements Race {
              }
         } else {
             if (p.getLocation().getPitch() <= -60) {
-                new NecroLifeTap().execute(p, null, 0);
+                new NecroLifeTap().execute(p, null, dmg);
             } else if (p.getLocation().getPitch() >= 60) {
                 //
             } else {
@@ -153,19 +161,11 @@ public class Necromancer implements Race {
     }
     
     public void attackEntity(Player p, EntityDamageByEntityEvent e) {
+        Race race = RaceMgr.getRace(p.getName());
+        
         int dmg = e.getDamage();
-        boolean classWeapon = false;
-        if (p.getItemInHand().getType() == Material.BONE) {    classWeapon = true; }
-//TODO: Config - Change damage?
-        //if () {
-            if (classWeapon) {
-                e.setDamage(dmg + (Config.damageAlter ? dmgClass : 0));
-            } else {
-                if (p.getItemInHand().getType() != Material.AIR) {
-                    e.setDamage(dmg + (Config.damageAlter ? dmgOther : 0));
-                }
-            }
-        //}
+        int dmgClass = Config.alterDamage ? Util.calcDamage(race, dmg, Util.classWep(race, p.getItemInHand().getTypeId())) : dmg;
+        e.setDamage(dmgClass);
     }
     
     public void interactEntity(Player p, Entity ent) {

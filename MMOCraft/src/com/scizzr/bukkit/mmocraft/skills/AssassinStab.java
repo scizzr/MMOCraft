@@ -7,14 +7,15 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import com.scizzr.bukkit.mmocraft.config.Config;
 import com.scizzr.bukkit.mmocraft.interfaces.Race;
 import com.scizzr.bukkit.mmocraft.interfaces.Skill;
 import com.scizzr.bukkit.mmocraft.managers.RaceMgr;
 import com.scizzr.bukkit.mmocraft.managers.SkillMgr;
 
 public class AssassinStab implements Skill {
-    int cooldown = 100;
-    int lvlReq   =  30;
+    int cooldown = Config.assSklStabCd;
+    int lvlReq   = Config.assSklStabLvl;
     
     Random rand = new Random();
     

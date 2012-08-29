@@ -24,6 +24,9 @@ public class BarbAxeWhirl implements Skill {
     }
     
     public void execute(Player p, Entity ent, float f) {
+        Race race = RaceMgr.getRace(p.getName());
+        if (race.hasData("spinning")) { return; }
+        
         if (isCooldown(p)) { return; } else { SkillMgr.addCooldown(p, getName(), cooldown); }
         if (!isLevel(p)) { return; }
         
@@ -35,11 +38,7 @@ public class BarbAxeWhirl implements Skill {
         
         for (Entity en : p.getNearbyEntities(3, 3, 3)) {
             if (en instanceof LivingEntity) {
-                
-                ((LivingEntity)en).damage((int)(
-                    ((f*2)/num )
-                    
-                ));
+                ((LivingEntity) en).damage((int)(f/num ), p);
             }
         }
     }

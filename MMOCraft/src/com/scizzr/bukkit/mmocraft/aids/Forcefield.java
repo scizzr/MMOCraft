@@ -105,6 +105,7 @@ public class Forcefield implements Aid {
     
     public void fire() {
         Player player = Bukkit.getPlayerExact(owner);
+        
         if (player != null) {
             try {
                 for (Entity ent : location.getWorld().getEntities()) {

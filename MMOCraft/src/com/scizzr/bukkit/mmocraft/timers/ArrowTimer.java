@@ -53,7 +53,8 @@ public class ArrowTimer implements Runnable {
     
     public static void explode(Arrow arrow) {
         Location loc = arrow.getLocation().clone();
-        new Thread(new Explosion(loc, false)).start();
+        
+        Explosion.make(loc, 1.5F, false);
         
         for (Entity ent : loc.getWorld().getEntities()) {
             if (ent instanceof LivingEntity && ent.getLocation().clone().distance(arrow.getLocation().clone()) <= 30) {

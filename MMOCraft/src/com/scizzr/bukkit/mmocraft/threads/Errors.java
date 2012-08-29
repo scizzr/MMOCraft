@@ -9,7 +9,7 @@ import java.net.URLEncoder;
 
 import org.bukkit.Bukkit;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.config.Config;
 import com.scizzr.bukkit.mmocraft.util.Base64;
 import com.scizzr.bukkit.mmocraft.util.I18n;
@@ -33,15 +33,15 @@ public class Errors implements Runnable {
             
             URL url = new URL(
                     //$uuid && $system && $plugname && $plugver && $ver && $err
-                    String.format("http://www.scizzr.com/plugins/errors.php")
+                    String.format(MMOCraft.host + "plugins/errors.php")
                 );
             
             String data = new String(
                     //$uuid && $system && $plugname && $plugver && $ver && $err
                     String.format("uniqid=" + "%s", URLEncoder.encode(Config.genUniqID, "UTF-8")) + 
-                    String.format("&system=" + "%s", URLEncoder.encode(Main.osN, "UTF-8")) +
-                    String.format("&plugname=" + "%s", URLEncoder.encode(Main.info.getName(), "UTF-8")) +
-                    String.format("&plugver=" + "%s", URLEncoder.encode(Main.info.getVersion(), "UTF-8")) +
+                    String.format("&system=" + "%s", URLEncoder.encode(MMOCraft.osN, "UTF-8")) +
+                    String.format("&plugname=" + "%s", URLEncoder.encode(MMOCraft.info.getName(), "UTF-8")) +
+                    String.format("&plugver=" + "%s", URLEncoder.encode(MMOCraft.info.getVersion(), "UTF-8")) +
                     String.format("&ver=" + "%s", URLEncoder.encode(ver, "UTF-8")) +
                     String.format("&err=" + "%s", URLEncoder.encode(err, "UTF-8"))
                 );
@@ -56,16 +56,16 @@ public class Errors implements Runnable {
             String line = buff.readLine();
             
             while (line != null) {
-                // do nothing; just post stats
+                // do nothing; just post error
                 line = buff.readLine();
             }
             
             stream.close();
         } catch (Exception ex) {
-            Main.log.info(Main.prefixConsole + "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
-            Main.log.info(Main.prefixConsole + I18n._("stackfailA", new Object[] {}));
-            Main.log.info(Main.prefixConsole + I18n._("stackfailB", new Object[] {}));
-            Main.log.info(Main.prefixConsole + "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+            MMOCraft.log.info(MMOCraft.prefixConsole + "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+            MMOCraft.log.info(MMOCraft.prefixConsole + I18n._("stackfailA", new Object[] {}));
+            MMOCraft.log.info(MMOCraft.prefixConsole + I18n._("stackfailB", new Object[] {}));
+            MMOCraft.log.info(MMOCraft.prefixConsole + "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
         }
     }
 }

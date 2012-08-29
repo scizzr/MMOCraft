@@ -12,7 +12,7 @@ import com.scizzr.bukkit.mmocraft.managers.SkillMgr;
 import com.scizzr.bukkit.mmocraft.threads.Lightning;
 
 public class WizardLightning implements Skill {
-    int cooldown =  20;
+    int cooldown =  10;
     int lvlReq   =  10;
     
     Random rand = new Random();

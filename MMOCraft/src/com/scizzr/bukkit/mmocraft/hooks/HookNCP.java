@@ -1,23 +1,24 @@
 package com.scizzr.bukkit.mmocraft.hooks;
 
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
+//import org.bukkit.event.EventHandler;
+//import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 
-import fr.neatmonster.nocheatplus.checks.moving.RunningCheck.RunningCheckEvent;
+//import fr.neatmonster.nocheatplus.hooks.NCPHook;
 
 public class HookNCP extends JavaPlugin implements Listener {
-    Main plugin;
+    MMOCraft plugin;
     
-    public HookNCP(Main instance) {
+    public HookNCP(MMOCraft instance) {
         plugin = instance;
     }
-    
+    /*
     @EventHandler(priority = EventPriority.MONITOR)
     public void onRunFlyCheck(final RunningCheckEvent e) {
         //
     }
+    */
 }

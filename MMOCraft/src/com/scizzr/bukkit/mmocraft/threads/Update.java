@@ -10,7 +10,7 @@ import java.net.URLConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.scizzr.bukkit.mmocraft.Main;
+import com.scizzr.bukkit.mmocraft.MMOCraft;
 import com.scizzr.bukkit.mmocraft.config.Config;
 import com.scizzr.bukkit.mmocraft.util.I18n;
 
@@ -30,63 +30,66 @@ public class Update implements Runnable {
         if (act.equalsIgnoreCase("check")) {
             try { check((Player) par1); } catch(Exception ex) { ex.printStackTrace(); }
         } else if (act.equalsIgnoreCase("update")) {
-            try { update((Player) par1, (String) par2); } catch(Exception ex) { Main.suicide(ex); }
+            try {
+                update((Player) par1, (String) par2);
+            } catch(Exception ex) {
+                //ex.printStackTrace();
+                //MMOCraft.suicide(ex);
+            }
         }
     }
     
     public static void check(Player p) throws Exception {
-        URL url = new URL(
-            String.format("http://www.scizzr.com/plugins/version.php?rev=3&plug=" + Main.info.getName())
-        );
-        
-        URLConnection conn = url.openConnection();
-        InputStreamReader stream = new InputStreamReader(conn.getInputStream());
-        BufferedReader buff = new BufferedReader(stream);
-        String line = buff.readLine();
-        
-        while (line != null) {
-            String[] data = line.split("<br/>");
-            if (data.length == 2) {
-                String updURL = data[1];
-                String verNew = data[0];
-                String verCur = Main.info.getVersion();
-                if (!verNew.equalsIgnoreCase(verCur)) {
-                    if (Config.genAutoUpdate == true) {
-                        if (updated == false) {
-                            new Thread(new Update("update", p, verNew + "@" + updURL)).start();
+        try {
+            URL url = new URL(
+                String.format(MMOCraft.host + "plugins/version.php?rev=3&plug=" + MMOCraft.info.getName())
+            );
+            
+            URLConnection conn = url.openConnection();
+            InputStreamReader stream = new InputStreamReader(conn.getInputStream());
+            BufferedReader buff = new BufferedReader(stream);
+            String line = buff.readLine();
+            
+            while (line != null) {
+                String[] data = line.split("<br/>");
+                if (data.length == 2) {
+                    String updURL = data[1];
+                    String verNew = data[0];
+                    String verCur = MMOCraft.info.getVersion();
+                    if (!verNew.equalsIgnoreCase(verCur)) {
+                        if (Config.genAutoUpdate == true) {
+                            if (updated == false) {
+                                new Thread(new Update("update", p, verNew + "@" + updURL)).start();
+                            } else {
+                                p.sendMessage(MMOCraft.prefix + I18n._("upddone", new Object[] {verUpd}));
+                                p.sendMessage(MMOCraft.prefix + I18n._("updready", new Object[] {}));
+                            }
                         } else {
-                            p.sendMessage(Main.prefix + I18n._("upddone", new Object[] {verUpd}));
-                            p.sendMessage(Main.prefix + I18n._("updready", new Object[] {}));
-                        }
-                    } else {
-                        if (p != null) {
-                            p.sendMessage(Main.prefix + I18n._("updavailA", new Object[] {Main.info.getName()}));
-                            p.sendMessage(Main.prefix + I18n._("updavailB", new Object[] {verNew}));
-                            p.sendMessage(ChatColor.YELLOW + "http://dev.bukkit.org" + updURL);
-                            //Old URL
-                            //p.sendMessage(ChatColor.YELLOW + "http://www.scizzr.com/plugins/" + Main.info.getName() + ".jar");
+                            if (p != null) {
+                                p.sendMessage(MMOCraft.prefix + I18n._("updavailA", new Object[] {MMOCraft.info.getName()}));
+                                p.sendMessage(MMOCraft.prefix + I18n._("updavailB", new Object[] {verNew}));
+                                p.sendMessage(ChatColor.YELLOW + "http://dev.bukkit.org" + updURL);
+                            }
                         }
                     }
+                    line = buff.readLine();
                 }
-                line = buff.readLine();
             }
+            stream.close();
+        } catch (Exception ex) {
+            //ex.printStackTrace();
+            //MMOCraft.suicide(ex);
         }
-        stream.close();
     }
     
     public static void update(Player p, String verAndUrl) throws Exception {
         String[] split = verAndUrl.split("@");
         String ver = split[0];
-        //Old URL 1
-        //String url = "http://www.scizzr.com/plugins/" + Main.info.getName() + ".jar";
-        //Old URL 2
-        //String url = split[1];
         String url = "http://dev.bukkit.org" + split[1];
         
         java.io.BufferedInputStream in = new java.io.BufferedInputStream(new URL(url).openStream());
         
-        //File tgt = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-        File tgt = Main.filePlug;
+        File tgt = MMOCraft.filePlug;
         
         java.io.FileOutputStream fos = new java.io.FileOutputStream(tgt);
         
@@ -102,8 +105,8 @@ public class Update implements Runnable {
         in.close();
         
         if (p != null) {
-            p.sendMessage(Main.prefix + I18n._("upddone", new Object[] {ver}));
-            p.sendMessage(Main.prefix + I18n._("updready", new Object[] {}));
+            p.sendMessage(MMOCraft.prefix + I18n._("upddone", new Object[] {ver}));
+            p.sendMessage(MMOCraft.prefix + I18n._("updready", new Object[] {}));
         }
         
         updated = true; verUpd = ver;
